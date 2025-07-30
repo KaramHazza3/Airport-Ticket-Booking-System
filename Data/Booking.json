@@ -1,0 +1,18 @@
+[
+  {
+    "Id": "832a9f0e-d98a-4461-a8f5-1c163af495d7",
+    "PassengerId": "f8edc72a-1fd5-4be9-b6e1-bb805aa443f1",
+    "FlightId": "30024d7c-0f98-41eb-9763-a9dcaac18521",
+    "FlightClass": 1,
+    "BookingDate": "0001-01-01T00:00:00",
+    "FlightTime": 2
+  },
+  {
+    "Id": "85c38da1-e773-471c-a2d3-60f69c92f61f",
+    "PassengerId": "f8edc72a-1fd5-4be9-b6e1-bb805aa443f1",
+    "FlightId": "3b976140-2d41-4966-a7db-c64c0ed67f4d",
+    "FlightClass": 2,
+    "BookingDate": "0001-01-01T00:00:00",
+    "FlightTime": 2
+  }
+]

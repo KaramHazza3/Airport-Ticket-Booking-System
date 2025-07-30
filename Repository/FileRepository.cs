@@ -10,6 +10,7 @@ public class FileRepository : IRepository
     }
     private FileRepository() {}
     private static FileRepository? _instance;
+    private static readonly JsonSerializerOptions Options = new(){ WriteIndented = true };
 
     public static FileRepository Instance => _instance ??= new FileRepository();
 
@@ -23,24 +24,53 @@ public class FileRepository : IRepository
         return await ReadAsCollectionFromFileAsync<T>(filePath);
     }
 
-    public async Task WriteAsync<T>(T data) where T : class
+    public async Task<T> WriteAsync<T>(T data) where T : class
     {
         if (data == null) throw new ArgumentNullException(nameof(data));
 
         var collectionName = typeof(T).Name;
         var filePath = GetFilePath(collectionName);
         await CreateFileIfDoesNotExist(filePath);
-        var fileContent = await File.ReadAllTextAsync(filePath);
-        var items = JsonSerializer.Deserialize<List<T>>(fileContent) ?? [];
-        if (items.Contains(data)) return;
+        var items = await GetFileContentAsList<T>(filePath);
+        if (items.Contains(data))
+        {
+            return data;
+        }
         items.AddRange(data);
         await WriteCollectionToFileAsync(items, filePath);
+        return data;
     }
-    
+
+    public async Task DeleteAsync<T>(T data) where T : class
+    {
+        var collectionName = typeof(T).Name;
+        var filePath = GetFilePath(collectionName);
+        var items = await GetFileContentAsList<T>(filePath);
+        var index = items.FindIndex(item => item.Equals(data));
+        items.RemoveAt(index);
+        await WriteCollectionToFileAsync(items, filePath);
+    }
+
+    public async Task<T> UpdateAsync<T>(T data) where T : class
+    {
+        var collectionName = typeof(T).Name;
+        var filePath = GetFilePath(collectionName);
+        var items = await GetFileContentAsList<T>(filePath);
+        var index = items.FindIndex(item => item.Equals(data));
+        items[index] = data;
+        await WriteCollectionToFileAsync(items, filePath);
+        return data;
+    }
+
+    private static async Task<List<T>> GetFileContentAsList<T>(string filePath)
+    {
+        var fileContent = await File.ReadAllTextAsync(filePath);
+        return JsonSerializer.Deserialize<List<T>>(fileContent) ?? [];
+    }
+
     private static async Task WriteCollectionToFileAsync<T>(ICollection<T> items, string filePath)
     {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        var json = JsonSerializer.Serialize(items, options);
+        var json = JsonSerializer.Serialize(items, Options);
         await File.WriteAllTextAsync(filePath, json);
     }
     private static async Task CreateFileIfDoesNotExist(string filePath)

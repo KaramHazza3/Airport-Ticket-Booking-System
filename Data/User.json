@@ -40,5 +40,12 @@
     "Email": "Karam@gmail.com",
     "Password": "Karam123",
     "Role": 1
+  },
+  {
+    "Id": "a9ff90b4-c6e1-4d0b-b219-ded57a46bd86",
+    "Name": "Amr",
+    "Email": "Amr@gmail.com",
+    "Password": "Amr",
+    "Role": 1
   }
 ]
