@@ -8,36 +8,55 @@ namespace FTSAirportTicketBookingSystem.Services.UserService;
 public class UserService : IUserService
 {
     private readonly IRepository _repository;
-    private List<User>? _cachedUsers;
     public UserService(IRepository repository)
     {
         this._repository = repository;
     }
-    public async Task<Result<User>> GetUserByIdAsync(Guid userId)
+    
+    public async Task<Result<User>> GetAsync(Func<User, bool> predicate)
     {
-        var users = await GetUsersAsync();
-        var user = users.SingleOrDefault(u => u.Id == userId);
-        return user is null ? UserErrors.NotFound : user;
+        var users = await this._repository.ReadAsync<User>();
+        var usersList = users.ToList();
+        var user = usersList.SingleOrDefault(predicate);
+        return user == null ? UserErrors.NotFound : user;
     }
-    public async Task<List<User>> GetAllUsersAsync() => await GetUsersAsync();
-    public async Task<Result<User>> AddUserAsync(User user)
+
+    public async Task<Result<ICollection<User>>> GetAllAsync()
     {
-        var users = await GetUsersAsync();
-        var isExist = users.Any(u => u.Email.Equals(user.Email));
+        var users = await this._repository.ReadAsync<User>();
+        return users.ToList();
+    }
+
+    public async Task<Result<User>> AddAsync(User user)
+    {
+        var users = await this._repository.ReadAsync<User>();
+        var usersList = users.ToList();
+        var isExist = usersList.Any(u => u.Email.Equals(user.Email));
         if (isExist)
         {
             return UserErrors.AlreadyExists;
         }
-        await this._repository.WriteAsync(user);
-        users.Add(user);
-        return user;
+        return await this._repository.WriteAsync(user);
     }
-    
-    private async Task<List<User>> GetUsersAsync()
+
+    public async Task<Result> DeleteAsync(Guid userId)
     {
-        if (_cachedUsers is not null) return _cachedUsers;
-        var users = await _repository.ReadAsync<User>();
-        _cachedUsers = users.ToList();
-        return _cachedUsers;
+        var users = await this._repository.ReadAsync<User>();
+        var usersList = users.ToList();
+        var user = usersList.SingleOrDefault(b => b.Id == userId);
+        if (user == null)
+        {
+            return Result.Failure(UserErrors.NotFound);
+        }
+        await this._repository.DeleteAsync(user);
+        return Result.Success();
+    }
+
+    public async Task<Result<User>> UpdateAsync(Guid id, User user)
+    {
+        var users = await this._repository.ReadAsync<User>();
+        var usersList = users.ToList();
+        var isExist = usersList.Exists(b => b.Id == id);
+        return isExist ?  await this._repository.UpdateAsync(user): UserErrors.NotFound;
     }
 }

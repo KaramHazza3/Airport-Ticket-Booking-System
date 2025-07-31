@@ -17,17 +17,18 @@ public class AuthService : IAuthService
     public async Task<Result> Register(string name, string email, string password, UserRole role)
     {
         var newUser = new User(name, email, password, role);
-        return await this._userService.AddUserAsync(newUser);
+        return await this._userService.AddAsync(newUser);
     }
 
     public async Task<Result<User>> Login(string email, string password)
     {
-        var users = await this._userService.GetAllUsersAsync();
-        var user = users.SingleOrDefault(u => u.Email.Equals(email) && u.Password.Equals(password));
-        if (user is null)
+        var result = await this._userService.GetAllAsync();
+        if (result.IsFailure)
         {
-            return UserErrors.NotFound;
+            return result.Error;
         }
-        return user;
+        var users = result.Value;
+        var user = users.SingleOrDefault(u => u.Email.Equals(email) && u.Password.Equals(password));
+        return user == null ? AuthErrors.Unauthorized : user;
     }
 }

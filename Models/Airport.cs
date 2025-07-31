@@ -1,6 +1,13 @@
 ﻿namespace FTSAirportTicketBookingSystem.Models;
 
-public record Airport(Guid Id, string Name, Country Country)
+public class Airport
 {
-    public Airport(string name, Country country): this(Guid.NewGuid(), name, country) { }
+    public required Guid Id { get; set; }
+    public required string Name { get; set; }
+    public required Country Country { get; set; }
+    
+    public override string ToString()
+    {
+        return $"Airport: {Name} - Id: {Id}";
+    }
 }

@@ -1,13 +1,11 @@
-﻿using FTSAirportTicketBookingSystem.Models.Enums;
-
-namespace FTSAirportTicketBookingSystem.Models;
+﻿namespace FTSAirportTicketBookingSystem.Models;
 
 public class Booking : IEquatable<Booking>
 {
     public Guid Id { get; init; }
     public Guid PassengerId { get; set; }
     public Guid FlightId { get; set; }
-    public FlightClass FlightClass { get; set; }
+    public FlightClassInfo FlightClass { get; set; }
     public DateTime BookingDate { get; }
     public int FlightTime { get; set; }
     
@@ -17,7 +15,7 @@ public class Booking : IEquatable<Booking>
     {
         this.Id = Guid.NewGuid();
     }
-    public Booking(Guid passengerId, Guid flightId, FlightClass flightClass, int flightTime, decimal price)
+    public Booking(Guid passengerId, Guid flightId, FlightClassInfo flightClass, int flightTime)
     {
         this.Id = Guid.NewGuid();
         this.PassengerId = passengerId;
@@ -25,7 +23,7 @@ public class Booking : IEquatable<Booking>
         this.FlightClass = flightClass;
         this.BookingDate = DateTime.UtcNow;
         this.FlightTime = flightTime;
-        this.Price = price;
+        this.Price = flightClass.Price;
     }
 
     public override bool Equals(object? obj) => Equals(obj as Booking);
