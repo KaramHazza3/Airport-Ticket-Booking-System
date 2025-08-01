@@ -1,11 +1,12 @@
-﻿namespace FTSAirportTicketBookingSystem.Models;
+﻿using FTSAirportTicketBookingSystem.Models.Enums;
+namespace FTSAirportTicketBookingSystem.Models;
 
 public class Booking : IEquatable<Booking>
 {
     public Guid Id { get; init; }
-    public Guid PassengerId { get; set; }
-    public Guid FlightId { get; set; }
-    public FlightClassInfo FlightClass { get; set; }
+    public User Passenger { get; set; }
+    public Flight Flight { get; set; }
+    public FlightClass FlightClass { get; set; }
     public DateTime BookingDate { get; }
     public int FlightTime { get; set; }
     
@@ -15,15 +16,17 @@ public class Booking : IEquatable<Booking>
     {
         this.Id = Guid.NewGuid();
     }
-    public Booking(Guid passengerId, Guid flightId, FlightClassInfo flightClass, int flightTime)
+    public Booking(User passenger, Flight flight, FlightClass flightClass, int flightTime)
     {
         this.Id = Guid.NewGuid();
-        this.PassengerId = passengerId;
-        this.FlightId = flightId;
+        this.Passenger = passenger;
+        this.Flight = flight;
         this.FlightClass = flightClass;
         this.BookingDate = DateTime.UtcNow;
         this.FlightTime = flightTime;
-        this.Price = flightClass.Price;
+        this.Price = this.Flight.AvailableClasses
+            .Where(x => x.ClassType == flightClass)
+            .Sum(x => x.Price);
     }
 
     public override bool Equals(object? obj) => Equals(obj as Booking);
@@ -40,8 +43,8 @@ public class Booking : IEquatable<Booking>
     { 
         return $@"Booking {{
     Id           : {Id}
-    PassengerId  : {PassengerId}
-    FlightId     : {FlightId}
+    PassengerName  : {Passenger.Name}
+    FlightId    : {Flight.Id}
     FlightClass  : {FlightClass}
     BookingDate  : {BookingDate:yyyy-MM-dd HH:mm:ss} (UTC)
     FlightTime   : {FlightTime} hours

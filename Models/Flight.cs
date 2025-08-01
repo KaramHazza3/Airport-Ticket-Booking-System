@@ -1,4 +1,4 @@
-﻿namespace FTSAirportTicketBookingSystem.Models.Flight;
+﻿namespace FTSAirportTicketBookingSystem.Models;
 
 public class Flight
 {

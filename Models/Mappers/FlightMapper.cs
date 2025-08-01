@@ -2,7 +2,7 @@
 using FTSAirportTicketBookingSystem.Models.DTOs;
 using FTSAirportTicketBookingSystem.Models.Enums;
 
-namespace FTSAirportTicketBookingSystem.Models.Flight;
+namespace FTSAirportTicketBookingSystem.Models;
 
 public static class FlightMapper
 {
