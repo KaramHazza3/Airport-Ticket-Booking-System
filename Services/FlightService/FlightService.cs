@@ -2,7 +2,6 @@
 using FTSAirportTicketBookingSystem.Common.Errors;
 using FTSAirportTicketBookingSystem.Common.Services;
 using FTSAirportTicketBookingSystem.Models;
-using FTSAirportTicketBookingSystem.Models.Flight;
 using FTSAirportTicketBookingSystem.Repository;
 
 namespace FTSAirportTicketBookingSystem.Services.FlightService;
@@ -66,13 +65,6 @@ public class FlightService : IFlightService, IFilterService<Flight>
     
     public async Task<Result<List<Flight>>> FilterAsync(params Func<Flight, bool>[] match)
     {
-        var result = await this.GetAllAsync();
-        if (result.IsFailure)
-        {
-            return result.Error;
-        }
-        var flights = result.Value;
-        Func<Flight, bool> combinedMatches = f => match.All(predicate => predicate(f));
-        return flights.Where(combinedMatches).ToList();
+        return await FilterHelper.FilterAsync(this, match);
     }
 }

@@ -33,7 +33,7 @@ public class BookingService : IBookingService, IFilterService<Booking>
     {
         var bookings = await this._repository.ReadAsync<Booking>();
         var bookingList = bookings.ToList();
-        var isExist = bookingList.Any(b => b.PassengerId == booking.PassengerId && b.FlightId == booking.FlightId);
+        var isExist = bookingList.Any(b => b.Passenger.Id == booking.Passenger.Id && b.Flight.Id == booking.Flight.Id);
         return isExist ? BookingErrors.AlreadyExists : await this._repository.WriteAsync(booking);
     }
 
@@ -60,13 +60,6 @@ public class BookingService : IBookingService, IFilterService<Booking>
 
     public async Task<Result<List<Booking>>> FilterAsync(params Func<Booking, bool>[] match)
     {
-        var result = await this.GetAllAsync();
-        if (result.IsFailure)
-        {
-            return result.Error;
-        }
-        var bookings = result.Value;
-        Func<Booking, bool> combinedMatches = f => match.All(predicate => predicate(f));
-        return bookings.Where(combinedMatches).ToList();
+        return await FilterHelper.FilterAsync(this, match);
     }
 }
