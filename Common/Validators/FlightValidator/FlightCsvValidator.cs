@@ -10,143 +10,79 @@ public static class FlightCsvValidator
     {
         var errors = new List<ValidationError>();
 
-        if (string.IsNullOrWhiteSpace(Convert.ToString(dto.Id)) || !Guid.TryParse(Convert.ToString(dto.Id), out _))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.Id),
-                ErrorMessage = "Invalid or missing Id."
-            });
-        }
-
-        if (dto.BasePrice <= 0)
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.BasePrice),
-                ErrorMessage = "BasePrice must be greater than zero."
-            });
-        }
-
-        if (string.IsNullOrWhiteSpace(dto.DepartureCountry))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.DepartureCountry),
-                ErrorMessage = "DepartureCountry is required."
-            });
-        }
-
-        if (string.IsNullOrWhiteSpace(dto.DepartureAirport))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.DepartureAirport),
-                ErrorMessage = "DepartureAirport is required."
-            });
-        }
-
-        if (string.IsNullOrWhiteSpace(dto.DestinationCountry))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.DestinationCountry),
-                ErrorMessage = "DestinationCountry is required."
-            });
-        }
-
-        if (string.IsNullOrWhiteSpace(dto.ArrivalAirport))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.ArrivalAirport),
-                ErrorMessage = "ArrivalAirport is required."
-            });
-        }
-
-        if (!DateTime.TryParseExact(dto.DepartureDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var departureDate))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.DepartureDate),
-                ErrorMessage = "Invalid DepartureDate format."
-            });
-        }
-        else if (departureDate < DateTime.Now)
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.DepartureDate),
-                ErrorMessage = "DepartureDate cannot be in the past."
-            });
-        }
-
-        if (string.IsNullOrWhiteSpace(dto.AvailableClasses))
-        {
-            errors.Add(new ValidationError
-            {
-                RowNumber = rowNumber,
-                PropertyName = nameof(dto.AvailableClasses),
-                ErrorMessage = "AvailableClasses is required."
-            });
-        }
-        else
-        {
-            var classEntries = dto.AvailableClasses.Split(';');
-            foreach (var classEntry in classEntries)
-            {
-                var parts = classEntry.Split(':');
-                if (parts.Length != 3)
-                {
-                    errors.Add(new ValidationError
-                    {
-                        RowNumber = rowNumber,
-                        PropertyName = nameof(dto.AvailableClasses),
-                        ErrorMessage = $"Invalid class entry format: '{classEntry}'. Expected format: ClassType:Seats:Price"
-                    });
-                    continue;
-                }
-
-                if (!Enum.TryParse<FlightClass>(parts[0], out _))
-                {
-                    errors.Add(new ValidationError
-                    {
-                        RowNumber = rowNumber,
-                        PropertyName = nameof(dto.AvailableClasses),
-                        ErrorMessage = $"Invalid class type: '{parts[0]}'."
-                    });
-                }
-
-                if (!int.TryParse(parts[1], out int seats) || seats < 0)
-                {
-                    errors.Add(new ValidationError
-                    {
-                        RowNumber = rowNumber,
-                        PropertyName = nameof(dto.AvailableClasses),
-                        ErrorMessage = $"Invalid seat count: '{parts[1]}'. Must be a non-negative integer."
-                    });
-                }
-
-                if (!decimal.TryParse(parts[2], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal price) || price <= 0)
-                {
-                    errors.Add(new ValidationError
-                    {
-                        RowNumber = rowNumber,
-                        PropertyName = nameof(dto.AvailableClasses),
-                        ErrorMessage = $"Invalid price: '{parts[2]}'. Must be a positive decimal."
-                    });
-                }
-            }
-        }
+        ValidateId(dto.Id, rowNumber, errors);
+        ValidateRequiredField(dto.DepartureCountry, nameof(dto.DepartureCountry), rowNumber, errors);
+        ValidateRequiredField(dto.DepartureAirport, nameof(dto.DepartureAirport), rowNumber, errors);
+        ValidateRequiredField(dto.DestinationCountry, nameof(dto.DestinationCountry), rowNumber, errors);
+        ValidateRequiredField(dto.ArrivalAirport, nameof(dto.ArrivalAirport), rowNumber, errors);
+        ValidateDepartureDate(dto.DepartureDate, rowNumber, errors);
+        ValidateAvailableClasses(dto.AvailableClasses, rowNumber, errors);
 
         return errors;
+    }
+
+    private static void ValidateId(object? id, int rowNumber, List<ValidationError> errors)
+    {
+        if (string.IsNullOrWhiteSpace(Convert.ToString(id)) || !Guid.TryParse(Convert.ToString(id), out _))
+        {
+            errors.Add(new ValidationError(rowNumber, nameof(FlightCsvDto.Id), "Invalid or missing Id."));
+        }
+    }
+
+    private static void ValidateRequiredField(string? value, string propertyName, int rowNumber, List<ValidationError> errors)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            errors.Add(new ValidationError(rowNumber, propertyName, $"{propertyName} is required."));
+        }
+    }
+
+    private static void ValidateDepartureDate(string? date, int rowNumber, List<ValidationError> errors)
+    {
+        if (!DateTime.TryParseExact(date, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+        {
+            errors.Add(new ValidationError(rowNumber, nameof(FlightCsvDto.DepartureDate), "Invalid DepartureDate format."));
+        }
+        else if (parsedDate < DateTime.Now)
+        {
+            errors.Add(new ValidationError(rowNumber, nameof(FlightCsvDto.DepartureDate), "DepartureDate cannot be in the past."));
+        }
+    }
+
+    private static void ValidateAvailableClasses(string? availableClasses, int rowNumber, List<ValidationError> errors)
+    {
+        if (string.IsNullOrWhiteSpace(availableClasses))
+        {
+            errors.Add(new ValidationError(rowNumber, nameof(FlightCsvDto.AvailableClasses), "AvailableClasses is required."));
+            return;
+        }
+
+        var classEntries = availableClasses.Split(';');
+        foreach (var classEntry in classEntries)
+        {
+            var parts = classEntry.Split(':');
+            if (parts.Length != 3)
+            {
+                errors.Add(new ValidationError(rowNumber, nameof(FlightCsvDto.AvailableClasses), $"Invalid format: '{classEntry}'. Expected: ClassType:Seats:Price"));
+                continue;
+            }
+
+            var (classType, seatsStr, priceStr) = (parts[0], parts[1], parts[2]);
+
+            if (!Enum.TryParse<FlightClass>(classType, out _))
+            {
+                errors.Add(new(rowNumber, nameof(FlightCsvDto.AvailableClasses), $"Invalid class type: '{classType}'"));
+            }
+
+            if (!int.TryParse(seatsStr, out int seats) || seats < 0)
+            {
+                errors.Add(new(rowNumber, nameof(FlightCsvDto.AvailableClasses), $"Invalid seat count: '{seatsStr}'. Must be non-negative."));
+            }
+
+            if (!decimal.TryParse(priceStr, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal price) || price <= 0)
+            {
+                errors.Add(new(rowNumber, nameof(FlightCsvDto.AvailableClasses), $"Invalid price: '{priceStr}'. Must be a positive decimal."));
+            }
+        }
     }
 }

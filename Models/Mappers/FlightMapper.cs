@@ -11,7 +11,6 @@ public static class FlightMapper
         return new Flight
         {
             Id = Guid.Parse(dto.Id),
-            BasePrice = dto.BasePrice,
             DepartureDate = DateTime.Parse(dto.DepartureDate),
             Departure = new Country { Id = Guid.NewGuid(), Name = dto.DepartureCountry },
             Destination = new Country {Id = Guid.NewGuid(), Name = dto.DestinationCountry },

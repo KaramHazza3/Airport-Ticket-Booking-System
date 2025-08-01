@@ -3,7 +3,6 @@
 public class FlightCsvDto
 {
     public string Id { get; set; }
-    public decimal BasePrice { get; set; }
     public string DepartureCountry { get; set; }
     public string DepartureAirport { get; set; }
     public string DestinationCountry { get; set; }

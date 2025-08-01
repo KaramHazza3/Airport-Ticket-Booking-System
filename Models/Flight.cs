@@ -1,4 +1,6 @@
-﻿namespace FTSAirportTicketBookingSystem.Models;
+﻿using FTSAirportTicketBookingSystem.Models.Enums;
+
+namespace FTSAirportTicketBookingSystem.Models;
 
 public class Flight
 {
@@ -16,19 +18,19 @@ public class Flight
     {
         
     }
-    public Flight(decimal basePrice, Country departure,
+    public Flight(Country departure,
         Country destination, Airport departureAirport,
         Airport arrivalAirport, DateTime departureDate,
         List<FlightClassInfo> availableClasses)
     {
         this.Id = Guid.NewGuid(); 
-        this.BasePrice = basePrice;
         this.Departure = departure;
         this.Destination = destination;
         this.DepartureAirport = departureAirport;
         this.ArrivalAirport = arrivalAirport;
         this.DepartureDate = departureDate;
         this.AvailableClasses = availableClasses;
+        this.BasePrice = AvailableClasses!.Where(ac => ac.ClassType == FlightClass.Economy).Sum(x => x.Price);
     }
     
     public override string ToString()

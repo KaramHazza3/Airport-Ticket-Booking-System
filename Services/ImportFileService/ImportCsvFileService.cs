@@ -25,7 +25,10 @@ public class ImportCsvFileService<TEntity, TDto> : IFileImportService<TEntity, T
         try
         {
             using var reader = new StreamReader(filePath);
-            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                MissingFieldFound = null
+            });
             var records = csv.GetRecords<TDto>().ToList();
 
             for (int i = 0; i < records.Count; i++)
