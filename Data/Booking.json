@@ -1,0 +1,197 @@
+[
+  {
+    "Id": "44d632e3-cf17-4451-9809-283b5dd1c51f",
+    "Passenger": {
+      "Id": "f7c76a5b-769a-42f6-bab4-aae711c0b989",
+      "Name": "Amr",
+      "Email": "Amr@gmail.com",
+      "Password": "Amr",
+      "Role": 1
+    },
+    "Flight": {
+      "Id": "2a63e7f7-2d87-4a82-97eb-12a6f3b18b2d",
+      "BasePrice": 30,
+      "Departure": {
+        "Id": "849f6ac3-5b0e-4069-b679-326970948203",
+        "Name": "United States",
+        "Code": "US"
+      },
+      "Destination": {
+        "Id": "b5154dba-43ca-4adf-8d7b-003f72f34ddf",
+        "Name": "United Kingdom",
+        "Code": "UK"
+      },
+      "DepartureAirport": {
+        "Id": "26167860-8cc8-40b9-a17f-7b2411abc3a1",
+        "Name": "USA Airport",
+        "Country": {
+          "Id": "849f6ac3-5b0e-4069-b679-326970948203",
+          "Name": "United States",
+          "Code": "US"
+        }
+      },
+      "ArrivalAirport": {
+        "Id": "aa127b4d-da2d-444c-bafe-06e55da3eada",
+        "Name": "UK Airport",
+        "Country": {
+          "Id": "b5154dba-43ca-4adf-8d7b-003f72f34ddf",
+          "Name": "United Kingdom",
+          "Code": "UK"
+        }
+      },
+      "DepartureDate": "2025-08-01T02:12:05.5057512Z",
+      "AvailableClasses": [
+        {
+          "ClassType": 1,
+          "AvailableSeats": 50,
+          "Price": 50
+        },
+        {
+          "ClassType": 2,
+          "AvailableSeats": 20,
+          "Price": 100
+        },
+        {
+          "ClassType": 0,
+          "AvailableSeats": 150,
+          "Price": 10
+        }
+      ],
+      "TotalAvailableSeats": 220
+    },
+    "FlightClass": 1,
+    "BookingDate": "0001-01-01T00:00:00",
+    "FlightTime": 2,
+    "Price": 0
+  },
+  {
+    "Id": "7559d06d-05d8-435a-a9f1-49edfb09b75a",
+    "Passenger": {
+      "Id": "f7c76a5b-769a-42f6-bab4-aae711c0b989",
+      "Name": "Amr",
+      "Email": "Amr@gmail.com",
+      "Password": "Amr",
+      "Role": 1
+    },
+    "Flight": {
+      "Id": "c94810e7-9747-4f35-81af-81b9e61b51d5",
+      "BasePrice": 30,
+      "Departure": {
+        "Id": "8a7ad5ba-0f69-4fde-a384-df21f26f240c",
+        "Name": "United States",
+        "Code": "US"
+      },
+      "Destination": {
+        "Id": "cabf2ae2-30fd-42ec-a9cc-2bd482ffd637",
+        "Name": "United Kingdom",
+        "Code": "UK"
+      },
+      "DepartureAirport": {
+        "Id": "ae356248-269b-488b-af84-134bd4944ccd",
+        "Name": "USA Airport",
+        "Country": {
+          "Id": "8a7ad5ba-0f69-4fde-a384-df21f26f240c",
+          "Name": "United States",
+          "Code": "US"
+        }
+      },
+      "ArrivalAirport": {
+        "Id": "973cadab-71c4-478f-92b3-a51c33c75f9e",
+        "Name": "UK Airport",
+        "Country": {
+          "Id": "cabf2ae2-30fd-42ec-a9cc-2bd482ffd637",
+          "Name": "United Kingdom",
+          "Code": "UK"
+        }
+      },
+      "DepartureDate": "2025-08-01T02:18:58.3747028Z",
+      "AvailableClasses": [
+        {
+          "ClassType": 1,
+          "AvailableSeats": 50,
+          "Price": 50
+        },
+        {
+          "ClassType": 2,
+          "AvailableSeats": 20,
+          "Price": 100
+        },
+        {
+          "ClassType": 0,
+          "AvailableSeats": 150,
+          "Price": 10
+        }
+      ],
+      "TotalAvailableSeats": 220
+    },
+    "FlightClass": 1,
+    "BookingDate": "0001-01-01T00:00:00",
+    "FlightTime": 2,
+    "Price": 50
+  },
+  {
+    "Id": "597e5d30-1cea-470d-98d3-5d6cb7ea40a4",
+    "Passenger": {
+      "Id": "f7c76a5b-769a-42f6-bab4-aae711c0b989",
+      "Name": "Amr",
+      "Email": "Amr@gmail.com",
+      "Password": "Amr",
+      "Role": 1
+    },
+    "Flight": {
+      "Id": "75043aa8-8077-4b6d-a6dd-e235c9f20087",
+      "BasePrice": 30,
+      "Departure": {
+        "Id": "65a2c322-4b3e-4e6f-b416-b7321f9838cb",
+        "Name": "United States",
+        "Code": "US"
+      },
+      "Destination": {
+        "Id": "331db676-9b71-4e5d-af3c-6128f4eaa90c",
+        "Name": "United Kingdom",
+        "Code": "UK"
+      },
+      "DepartureAirport": {
+        "Id": "240e5563-3b4d-4737-8dc6-4df2f691a1db",
+        "Name": "USA Airport",
+        "Country": {
+          "Id": "65a2c322-4b3e-4e6f-b416-b7321f9838cb",
+          "Name": "United States",
+          "Code": "US"
+        }
+      },
+      "ArrivalAirport": {
+        "Id": "029803a3-aaeb-45f4-b29c-f3d973409c67",
+        "Name": "UK Airport",
+        "Country": {
+          "Id": "331db676-9b71-4e5d-af3c-6128f4eaa90c",
+          "Name": "United Kingdom",
+          "Code": "UK"
+        }
+      },
+      "DepartureDate": "2025-08-01T02:19:45.8600105Z",
+      "AvailableClasses": [
+        {
+          "ClassType": 1,
+          "AvailableSeats": 50,
+          "Price": 50
+        },
+        {
+          "ClassType": 2,
+          "AvailableSeats": 20,
+          "Price": 100
+        },
+        {
+          "ClassType": 0,
+          "AvailableSeats": 150,
+          "Price": 10
+        }
+      ],
+      "TotalAvailableSeats": 220
+    },
+    "FlightClass": 2,
+    "BookingDate": "2025-08-01T02:19:46.0062547Z",
+    "FlightTime": 2,
+    "Price": 100
+  }
+]

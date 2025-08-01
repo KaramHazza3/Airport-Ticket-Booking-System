@@ -1,15 +1,26 @@
-﻿using FTSAirportTicketBookingSystem.Models.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using FTSAirportTicketBookingSystem.Common.CustomAttributes;
+using FTSAirportTicketBookingSystem.Models.Enums;
 namespace FTSAirportTicketBookingSystem.Models;
 
 public class Booking : IEquatable<Booking>
 {
+    [Required]
     public Guid Id { get; init; }
+    [Required]
     public User Passenger { get; set; }
+    [Required]
     public Flight Flight { get; set; }
+    [Required]
     public FlightClass FlightClass { get; set; }
+    [Required]
+    [Future]
     public DateTime BookingDate { get; }
+    [Required]
+    [Range(0.5, int.MaxValue, ErrorMessage = "Must be greater than 0")]
     public int FlightTime { get; set; }
-    
+    [Required]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Must be greater than 0")]
     public decimal Price { get; set; }
 
     public Booking()

@@ -1,6 +1,6 @@
 ﻿using CsvHelper;
+using FTSAirportTicketBookingSystem.Common;
 using FTSAirportTicketBookingSystem.Common.Validators;
-using FTSAirportTicketBookingSystem.Common.Validators.FlightValidator;
 using FTSAirportTicketBookingSystem.Models;
 using FTSAirportTicketBookingSystem.Models.DTOs;
 using FTSAirportTicketBookingSystem.Models.Enums;
@@ -17,10 +17,10 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        IRepository fileRepo = FileRepository.Instance;
-        var userService = new UserService(fileRepo);
-        var authService = new AuthService(userService);
-        var bookingService = new BookingService(fileRepo);
+        // IRepository fileRepo = FileRepository.Instance;
+        // var userService = new UserService(fileRepo);
+        // var authService = new AuthService(userService);
+        // var bookingService = new BookingService(fileRepo);
         // var country1 = new Country("United States", "US");
         // var country2 = new Country("United Kingdom", "UK");
         // var country3 = new Country("Palestine Authority", "PS");
@@ -57,14 +57,14 @@ class Program
         // {
         //     Console.WriteLine(result1.Error.Description);
         // }
-        var result2 = await authService.Login("Amr@gmail.com", "Amr");
-        if (result2.IsFailure)
-        {
-            Console.WriteLine(result2.Error.Description);
-            return;
-        }
-        var user = result2.Value;
-        Console.WriteLine($"{user} is logged in");
+        // var result2 = await authService.Login("Amr@gmail.com", "Amr");
+        // if (result2.IsFailure)
+        // {
+        //     Console.WriteLine(result2.Error.Description);
+        //     return;
+        // }
+        // var user = result2.Value;
+        // Console.WriteLine($"{user} is logged in");
         
         //
         // var booking1 = new Booking(user, flight1, FlightClass.FirstClass, 2);
@@ -124,6 +124,12 @@ class Program
         // foreach (var flight in result.Value)
         // {
         //     Console.WriteLine(flight);
+        // }
+        // var generator = new AttributeConstraintsGenerator();
+        // var x = generator.GetAttributesConstraints<Booking>();
+        // foreach (var a in x)
+        // {
+        //     Console.WriteLine(a);
         // }
     }
 }

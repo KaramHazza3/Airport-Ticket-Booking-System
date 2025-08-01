@@ -1,16 +1,26 @@
-﻿using FTSAirportTicketBookingSystem.Models.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using FTSAirportTicketBookingSystem.Common.CustomAttributes;
+using FTSAirportTicketBookingSystem.Models.Enums;
 
 namespace FTSAirportTicketBookingSystem.Models;
 
 public class Flight
 {
+    [Required]
     public Guid Id { get; set; }
-    public decimal BasePrice { get; set; }
+    public decimal BasePrice { get; init; }
+    [Required]
     public Country Departure { get; set; }
+    [Required]
     public Country Destination { get; set; }
+    [Required]
     public Airport DepartureAirport { get; set; }
+    [Required]
     public Airport ArrivalAirport { get; set; }
+    [Required]
+    [Future]
     public DateTime DepartureDate { get; set; }
+    [Required]
     public List<FlightClassInfo> AvailableClasses { get; init; }
     public int TotalAvailableSeats => AvailableClasses.Sum(c => c.AvailableSeats);
 

@@ -3,7 +3,7 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using FTSAirportTicketBookingSystem.Common;
 using FTSAirportTicketBookingSystem.Common.Services;
-using FTSAirportTicketBookingSystem.Common.Validators;
+using FTSAirportTicketBookingSystem.Common.Validators.CsvValidators.Models;
 
 namespace FTSAirportTicketBookingSystem.Services.ImportFileService;
 
@@ -14,13 +14,13 @@ public class ImportCsvFileService<TEntity, TDto> : IFileImportService<TEntity, T
         string filePath,
         Func<TDto, TEntity> mapper,
         IBaseService<TEntity> baseService,
-        Func<TDto, int, List<ValidationError>> validator)
+        Func<TDto, int, List<CsvValidationError>> validator)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return Result<List<TEntity>>.Failure(new Error("Csv.FilePath", "File path cannot be empty."));
         
         var entities = new List<TEntity>();
-        var validationErrors = new List<ValidationError>();
+        var validationErrors = new List<CsvValidationError>();
 
         try
         {
@@ -56,7 +56,7 @@ public class ImportCsvFileService<TEntity, TDto> : IFileImportService<TEntity, T
         }
     }
     
-    public async Task<Result<List<TEntity>>> HandleAddition(IBaseService<TEntity> service, List<ValidationError> validationErrors, List<TEntity> entities)
+    public async Task<Result<List<TEntity>>> HandleAddition(IBaseService<TEntity> service, List<CsvValidationError> validationErrors, List<TEntity> entities)
     {
         if (validationErrors.Any())
         {

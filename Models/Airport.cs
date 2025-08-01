@@ -1,15 +1,21 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FTSAirportTicketBookingSystem.Models;
 
 public class Airport
 {
-    public required Guid Id { get; set; }
-    public required string Name { get; set; }
-    public required Country Country { get; set; }
+    [Required]
+    public Guid Id { get; set; }
+    [Required]
+    public string Name { get; set; }
+    [Required]
+    public Country Country { get; set; }
 
-    public Airport() {}
-    [SetsRequiredMembers]
+    public Airport()
+    {
+        this.Id = Guid.NewGuid();
+    }
     public Airport(string name, Country country)
     {
         this.Id = Guid.NewGuid();

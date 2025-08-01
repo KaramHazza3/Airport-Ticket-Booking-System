@@ -1,0 +1,17 @@
+[
+  {
+    "Id": "0a1c130a-2453-4339-968a-233fbf862bf1",
+    "Name": "United States",
+    "Code": "US"
+  },
+  {
+    "Id": "05ed8bec-ccf6-41f3-8ee3-cdc210ff4896",
+    "Name": "United Kingdom",
+    "Code": "UK"
+  },
+  {
+    "Id": "5de39a08-1662-482a-aa4c-87a70595ceba",
+    "Name": "Palestine Authority",
+    "Code": "PS"
+  }
+]

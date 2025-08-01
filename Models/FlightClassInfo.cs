@@ -1,11 +1,17 @@
-﻿using FTSAirportTicketBookingSystem.Models.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using FTSAirportTicketBookingSystem.Models.Enums;
 
 namespace FTSAirportTicketBookingSystem.Models;
 
 public class FlightClassInfo
 {
+    [Required]
     public FlightClass ClassType { get; set; }
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Seats must be greater than 0")]
     public int AvailableSeats { get; set; }
+    [Required]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
     public decimal Price { get; set; }
 
     public FlightClassInfo(FlightClass classType, int availableSeats, decimal price)

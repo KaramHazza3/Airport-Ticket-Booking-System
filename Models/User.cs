@@ -1,11 +1,18 @@
-﻿namespace FTSAirportTicketBookingSystem.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FTSAirportTicketBookingSystem.Models;
 
 public class User
 {
+    [Required]
     public Guid Id { get; set; }
+    [Required]
     public string Name { get; init; } = string.Empty;
+    [Required]
     public string Email { get; init; } = string.Empty;
+    [Required]
     public string Password { get; init; } = string.Empty;
+    [Required]
     public UserRole Role { get; set; }
 
     public User()

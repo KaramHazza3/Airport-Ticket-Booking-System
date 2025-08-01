@@ -1,0 +1,29 @@
+[
+  {
+    "Id": "323398fa-107b-429f-81f6-6dd522a90051",
+    "Name": "USA Airport",
+    "Country": {
+      "Id": "0a1c130a-2453-4339-968a-233fbf862bf1",
+      "Name": "United States",
+      "Code": "US"
+    }
+  },
+  {
+    "Id": "f235a591-aaa6-4b92-bec8-feac9707e57a",
+    "Name": "UK Airport",
+    "Country": {
+      "Id": "05ed8bec-ccf6-41f3-8ee3-cdc210ff4896",
+      "Name": "United Kingdom",
+      "Code": "UK"
+    }
+  },
+  {
+    "Id": "06297cd6-c8ae-4c02-877f-d74cd94c1209",
+    "Name": "Palestine Airport",
+    "Country": {
+      "Id": "5de39a08-1662-482a-aa4c-87a70595ceba",
+      "Name": "Palestine Authority",
+      "Code": "PS"
+    }
+  }
+]
