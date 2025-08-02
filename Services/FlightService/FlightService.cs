@@ -6,7 +6,7 @@ using FTSAirportTicketBookingSystem.Repository;
 
 namespace FTSAirportTicketBookingSystem.Services.FlightService;
 
-public class FlightService : IFlightService, IFilterService<Flight>
+public class FlightService : IFlightService
 {
     private readonly IRepository _repository;
 

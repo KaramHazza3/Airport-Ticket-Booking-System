@@ -3,7 +3,7 @@ using FTSAirportTicketBookingSystem.Models;
 
 namespace FTSAirportTicketBookingSystem.Services.FlightService;
 
-public interface IFlightService : IBaseService<Flight>
+public interface IFlightService : IBaseService<Flight>, IFilterService<Flight>
 {
  
 }

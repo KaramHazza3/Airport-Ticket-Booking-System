@@ -7,10 +7,9 @@ using FTSAirportTicketBookingSystem.Common.Validators.CsvValidators.Models;
 
 namespace FTSAirportTicketBookingSystem.Services.ImportFileService;
 
-public class ImportCsvFileService<TEntity, TDto> : IFileImportService<TEntity, TDto>
-    where TEntity : class where TDto : class
+public class ImportCsvFileService : IFileImportService
 {
-    public async Task<Result<List<TEntity>>> ImportFileAsync(
+    public async Task<Result<List<TEntity>>> ImportFileAsync<TEntity, TDto>(
         string filePath,
         Func<TDto, TEntity> mapper,
         IBaseService<TEntity> baseService,
@@ -56,7 +55,7 @@ public class ImportCsvFileService<TEntity, TDto> : IFileImportService<TEntity, T
         }
     }
     
-    public async Task<Result<List<TEntity>>> HandleAddition(IBaseService<TEntity> service, List<CsvValidationError> validationErrors, List<TEntity> entities)
+    private static async Task<Result<List<TEntity>>> HandleAddition<TEntity>(IBaseService<TEntity> service, List<CsvValidationError> validationErrors, List<TEntity> entities)
     {
         if (validationErrors.Any())
         {

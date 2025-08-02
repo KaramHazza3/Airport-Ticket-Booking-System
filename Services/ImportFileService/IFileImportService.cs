@@ -6,9 +6,9 @@ using FTSAirportTicketBookingSystem.Models;
 
 namespace FTSAirportTicketBookingSystem.Services.ImportFileService;
 
-public interface IFileImportService<TEntity, TDto> 
+public interface IFileImportService
 {
-    Task<Result<List<TEntity>>> ImportFileAsync(
+    Task<Result<List<TEntity>>> ImportFileAsync<TEntity, TDto> (
         string filePath,
         Func<TDto, TEntity> mapper,
         IBaseService<TEntity> baseService,

@@ -14,13 +14,13 @@ public class AuthService : IAuthService
         this._userService = userService;
     }
     
-    public async Task<Result> Register(string name, string email, string password, UserRole role)
+    public async Task<Result> RegisterAsync(string name, string email, string password, UserRole role)
     {
         var newUser = new User(name, email, password, role);
         return await this._userService.AddAsync(newUser);
     }
 
-    public async Task<Result<User>> Login(string email, string password)
+    public async Task<Result<User>> LoginAsync(string email, string password)
     {
         var result = await this._userService.GetAllAsync();
         if (result.IsFailure)
