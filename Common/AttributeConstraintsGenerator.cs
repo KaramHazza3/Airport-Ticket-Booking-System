@@ -2,10 +2,10 @@
 
 namespace FTSAirportTicketBookingSystem.Common;
 
-public class AttributeConstraintsGenerator
+public static class AttributeConstraintsGenerator
 {
 
-    public List<AttributeConstraint> GetAttributesConstraints<T>()
+    public static List<AttributeConstraint> GetAttributesConstraints<T>()
     {
         var properties = typeof(T).GetProperties();
         var constraints = new List<AttributeConstraint>();

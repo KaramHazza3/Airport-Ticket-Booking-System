@@ -15,4 +15,6 @@ public static class FilterHelper
         Func<T, bool> combinedMatches = f => predicates.All(predicate => predicate(f));
         return resultList.Where(combinedMatches).ToList();
     }
+    
+    
 }
