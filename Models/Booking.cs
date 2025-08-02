@@ -16,9 +16,7 @@ public class Booking : IEquatable<Booking>
     [Required]
     [Future]
     public DateTime BookingDate { get; }
-    [Required]
-    [Range(0.5, int.MaxValue, ErrorMessage = "Must be greater than 0")]
-    public int FlightTime { get; set; }
+   
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Must be greater than 0")]
     public decimal Price { get; set; }
@@ -27,14 +25,13 @@ public class Booking : IEquatable<Booking>
     {
         this.Id = Guid.NewGuid();
     }
-    public Booking(User passenger, Flight flight, FlightClass flightClass, int flightTime)
+    public Booking(User passenger, Flight flight, FlightClass flightClass)
     {
         this.Id = Guid.NewGuid();
         this.Passenger = passenger;
         this.Flight = flight;
         this.FlightClass = flightClass;
         this.BookingDate = DateTime.UtcNow;
-        this.FlightTime = flightTime;
         this.Price = this.Flight.AvailableClasses
             .Where(x => x.ClassType == flightClass)
             .Sum(x => x.Price);
@@ -58,7 +55,6 @@ public class Booking : IEquatable<Booking>
     FlightId    : {Flight.Id}
     FlightClass  : {FlightClass}
     BookingDate  : {BookingDate:yyyy-MM-dd HH:mm:ss} (UTC)
-    FlightTime   : {FlightTime} hours
 }}";
     }
 }

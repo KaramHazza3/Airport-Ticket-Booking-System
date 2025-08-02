@@ -8,17 +8,38 @@ public static class FlightMapper
 {
     public static Flight FromCsvDto(FlightCsvDto dto)
     {
+        var departureCountry = new Country { Id = Guid.NewGuid(), Name = dto.DepartureCountry };
+        var destinationCountry = new Country { Id = Guid.NewGuid(), Name = dto.DestinationCountry };
+
+        var availableClasses = ParseFlightClasses(dto.AvailableClasses);
+
+        var basePrice = availableClasses
+            .Where(ac => ac.ClassType == FlightClass.Economy)
+            .Sum(x => x.Price);
+
         return new Flight
         {
             Id = Guid.Parse(dto.Id),
             DepartureDate = DateTime.Parse(dto.DepartureDate),
-            Departure = new Country { Id = Guid.NewGuid(), Name = dto.DepartureCountry },
-            Destination = new Country {Id = Guid.NewGuid(), Name = dto.DestinationCountry },
-            DepartureAirport = new Airport { Id = Guid.NewGuid(), Name = dto.DepartureAirport, Country = new Country { Id = Guid.NewGuid(), Name = dto.DepartureAirport } },
-            ArrivalAirport = new Airport { Id = Guid.NewGuid(), Name = dto.ArrivalAirport, Country = new Country { Id = Guid.NewGuid(), Name = dto.ArrivalAirport } },
-            AvailableClasses = ParseFlightClasses(dto.AvailableClasses)
+            Departure = departureCountry,
+            Destination = destinationCountry,
+            DepartureAirport = new Airport
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.DepartureAirport,
+                Country = departureCountry
+            },
+            ArrivalAirport = new Airport
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.ArrivalAirport,
+                Country = destinationCountry
+            },
+            AvailableClasses = availableClasses,
+            BasePrice = basePrice
         };
     }
+
     
     public static List<FlightClassInfo> ParseFlightClasses(string classesString)
     {

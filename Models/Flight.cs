@@ -8,7 +8,7 @@ public class Flight
 {
     [Required]
     public Guid Id { get; set; }
-    public decimal BasePrice { get; init; }
+    public decimal BasePrice { get; set; }
     [Required]
     public Country Departure { get; set; }
     [Required]
