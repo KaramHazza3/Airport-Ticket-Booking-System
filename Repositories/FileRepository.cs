@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace FTSAirportTicketBookingSystem.Repository;
+namespace FTSAirportTicketBookingSystem.Repositories;
 
 public class FileRepository : IRepository
 {
@@ -24,43 +24,36 @@ public class FileRepository : IRepository
         return await ReadAsCollectionFromFileAsync<T>(filePath);
     }
 
-    public async Task<T> WriteAsync<T>(T data) where T : class
+    public async Task WriteAsync<T>(List<T> data) where T : class
     {
         if (data == null) throw new ArgumentNullException(nameof(data));
 
         var collectionName = typeof(T).Name;
         var filePath = GetFilePath(collectionName);
         await CreateFileIfDoesNotExist(filePath);
-        var items = await GetFileContentAsList<T>(filePath);
-        if (items.Contains(data))
-        {
-            return data;
-        }
-        items.AddRange(data);
-        await WriteCollectionToFileAsync(items, filePath);
-        return data;
+        await WriteCollectionToFileAsync(data, filePath);
     }
 
-    public async Task DeleteAsync<T>(T data) where T : class
-    {
-        var collectionName = typeof(T).Name;
-        var filePath = GetFilePath(collectionName);
-        var items = await GetFileContentAsList<T>(filePath);
-        var index = items.FindIndex(item => item.Equals(data));
-        items.RemoveAt(index);
-        await WriteCollectionToFileAsync(items, filePath);
-    }
-
-    public async Task<T> UpdateAsync<T>(T data) where T : class
-    {
-        var collectionName = typeof(T).Name;
-        var filePath = GetFilePath(collectionName);
-        var items = await GetFileContentAsList<T>(filePath);
-        var index = items.FindIndex(item => item.Equals(data));
-        items[index] = data;
-        await WriteCollectionToFileAsync(items, filePath);
-        return data;
-    }
+    // public async Task DeleteAsync<T>(T[] data) where T : class
+    // {
+    //     var collectionName = typeof(T).Name;
+    //     var filePath = GetFilePath(collectionName);
+    //     var items = await GetFileContentAsList<T>(filePath);
+    //     var index = items.FindIndex(item => item.Equals(data));
+    //     items.RemoveAt(index);
+    //     await WriteCollectionToFileAsync(items, filePath);
+    // }
+    //
+    // public async Task<T> UpdateAsync<T>(T[] data) where T : class
+    // {
+    //     var collectionName = typeof(T).Name;
+    //     var filePath = GetFilePath(collectionName);
+    //     var items = await GetFileContentAsList<T>(filePath);
+    //     var index = items.FindIndex(item => item.Equals(data));
+    //     items[index] = data;
+    //     await WriteCollectionToFileAsync(items, filePath);
+    //     return data;
+    // }
 
     private static async Task<List<T>> GetFileContentAsList<T>(string filePath)
     {

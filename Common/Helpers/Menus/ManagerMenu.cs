@@ -1,4 +1,6 @@
-﻿using FTSAirportTicketBookingSystem.Common.Validators.CsvValidators.FlightValidator;
+﻿using System.Globalization;
+using FTSAirportTicketBookingSystem.Common.Helpers.Menus.Constants;
+using FTSAirportTicketBookingSystem.Common.Validators.CsvValidators.FlightValidator;
 using FTSAirportTicketBookingSystem.Models;
 using FTSAirportTicketBookingSystem.Models.DTOs;
 using FTSAirportTicketBookingSystem.Models.Mappers;
@@ -10,44 +12,16 @@ namespace FTSAirportTicketBookingSystem.Common.Helpers.Menus;
 
 public class ManagerMenu
 {
-    private readonly IBookingService _bookingService;
+    private readonly IBookingService<Guid> _bookingService;
     private readonly IFileImportService _importService;
-    private readonly IFlightService _flightService;
+    private readonly IFlightService<Guid> _flightService;
 
 
-    public ManagerMenu(IBookingService bookingService, IFileImportService importService, IFlightService flightService)
+    public ManagerMenu(IBookingService<Guid> bookingService, IFileImportService importService, IFlightService<Guid> flightService)
     {
-        this._bookingService = bookingService;
-        this._importService = importService;
-        this._flightService = flightService;
-    }
-    private static void ShowMenu()
-    {
-        Console.WriteLine("1. Import from CSV");
-        Console.WriteLine("2. View Validations Rules");
-        Console.WriteLine("3. Filter Bookings");
-        Console.WriteLine("4. Exit");
-    }
-
-    private static void ShowFilterBookingMenu()
-    {
-        Console.WriteLine("Filter Bookings");
-        Console.WriteLine("1. By Flight");
-        Console.WriteLine("2. By Passenger");
-        Console.WriteLine("3. By Departure Country");
-        Console.WriteLine("4. By Destination Country");
-        Console.WriteLine("5. By Departure Airport");
-        Console.WriteLine("6. By Destination Airport");
-        Console.WriteLine("7. By Flight Class Type");
-        Console.WriteLine("8. Exit");
-    }
-    
-    private static void ShowAvailableClassesMenu()
-    {
-        Console.WriteLine("Validation rules of available classes");
-        Console.WriteLine("1. User");
-        Console.WriteLine("2. Flight");
-        Console.WriteLine("3. Booking");
+        _bookingService = bookingService;
+        _importService = importService;
+        _flightService = flightService;
     }
     
     public async Task Handle()
@@ -59,16 +33,16 @@ public class ManagerMenu
 
             switch (managerInput)
             {
-                case "1":
+                case ManagerMenuConstants.ImportFlightsCsv:
                     await ImportFlightsFromCSV();
                     break;
-                case "2":
+                case ManagerMenuConstants.GetSpecificClassConstraints:
                     GetSpecificClassConstraints();
                     break;
-                case "3":
-                    await FilterBookingFiltering();
+                case ManagerMenuConstants.FilterBookings:
+                    await FilterBookings();
                     break;
-                case "4":
+                case ManagerMenuConstants.Exit:
                     AppMenu.Exit();
                     break;
                 default:
@@ -83,33 +57,29 @@ public class ManagerMenu
         ShowAvailableClassesMenu();
         Console.Write("Enter the class name: ");
         var className = Console.ReadLine();
-        if (string.IsNullOrEmpty(className))
-        {
-            Console.WriteLine("Invalid input");
-            return;
-        }
+        if (!ValidateRequiredString(className, nameof(className))) return;
 
         switch (className)
         {
-            case "1":
-                foreach (var attributeConstraint in AttributeConstraintsGenerator.GetAttributesConstraints<User>())
+            case ManagerMenuConstants.GetUserConstraints:
+                foreach (var attributeConstraint in AttributeConstraintsGenerator.GetValidationConstraints<User>())
                 {
                     Console.WriteLine(attributeConstraint);
                 }
                 break;
-            case "2":
-                foreach (var attributeConstraint in AttributeConstraintsGenerator.GetAttributesConstraints<Flight>())
+            case ManagerMenuConstants.GetFlightConstraints:
+                foreach (var attributeConstraint in AttributeConstraintsGenerator.GetValidationConstraints<Flight>())
                 {
                     Console.WriteLine(attributeConstraint);
                 }
                 break;
-            case "3":
-                foreach (var attributeConstraint in AttributeConstraintsGenerator.GetAttributesConstraints<Booking>())
+            case ManagerMenuConstants.GetBookingConstraints:
+                foreach (var attributeConstraint in AttributeConstraintsGenerator.GetValidationConstraints<Booking>())
                 {
                     Console.WriteLine(attributeConstraint);
                 }
                 break;
-            case "4":
+            case ManagerMenuConstants.Exit:
                 AppMenu.Exit();
                 break;
             default:
@@ -118,89 +88,59 @@ public class ManagerMenu
         }
     }
 
-    private async Task FilterBookingFiltering()
+    private async Task FilterBookings()
     {
       
         ShowFilterBookingMenu();
         Console.WriteLine("Enter filter strategy: ");
         var filterInput = Console.ReadLine();
-        if (string.IsNullOrEmpty(filterInput))
-        {
-            Console.WriteLine("Invalid input");
-            return;
-        }
+        if (!ValidateRequiredString(filterInput, nameof(filterInput))) return;
        
         switch (filterInput)
         {
-            case "1":
+            case ManagerMenuConstants.FilterByFlight:
                 Console.Write("Enter flight id: ");
-                if (!Guid.TryParse(Console.ReadLine(), out var flightId))
-                {
-                    Console.WriteLine("Invalid input");
-                    return;
-                }
+                var flightId = GetGuid(Console.ReadLine()!);
+                if (!ValidateGuid(flightId)) return;
                 await FilterBooking(b => b.Flight.Id == flightId);
                 break;
-            case "2":
+            case ManagerMenuConstants.FilterByUser:
                 Console.Write("Enter user id: ");
-                if (!Guid.TryParse(Console.ReadLine(), out var userId))
-                {
-                    Console.WriteLine("Invalid input");
-                    return;
-                }
+                var userId = GetGuid(Console.ReadLine()!);
+                if (!ValidateGuid(userId)) return;
                 await FilterBooking(b => b.Passenger.Id == userId);
                 break;
-            case "3":
+            case ManagerMenuConstants.FilterByDepartureCountry:
                 Console.Write("Enter country name: ");
                 var departureCountry = Console.ReadLine();
-                if (string.IsNullOrEmpty(departureCountry))
-                {
-                    Console.WriteLine("Invalid Input");
-                    return;
-                }
-                await FilterBooking(b => b.Flight.Departure.Name == departureCountry);
+                if (!ValidateRequiredString(departureCountry, nameof(departureCountry))) return;
+                await FilterBooking(b => CompareStringsWithoutCaseSensitive(b.Flight.Departure.Name, departureCountry!));
                 break;
-            case "4":
+            case ManagerMenuConstants.FilterByDestinationCountry:
                 Console.Write("Enter the country name: ");
                 var destinationCountry = Console.ReadLine();
-                if (string.IsNullOrEmpty(destinationCountry))
-                {
-                    Console.WriteLine("Invalid Input");
-                    return;
-                }
-                await FilterBooking(b => b.Flight.Destination.Name == destinationCountry);
+                if (!ValidateRequiredString(destinationCountry, nameof(destinationCountry))) return;
+                await FilterBooking(b => CompareStringsWithoutCaseSensitive(b.Flight.Destination.Name, destinationCountry!));
                 break;
-            case "5":
+            case ManagerMenuConstants.FilterByDepartureAirport:
                 Console.Write("Enter the airport name: ");
                 var departureAirport = Console.ReadLine();
-                if (string.IsNullOrEmpty(departureAirport))
-                {
-                    Console.WriteLine("Invalid Input");
-                    return;
-                }
-                await FilterBooking(b => b.Flight.DepartureAirport.Name == departureAirport);
+                if (!ValidateRequiredString(departureAirport, nameof(departureAirport))) return;
+                await FilterBooking(b => CompareStringsWithoutCaseSensitive(b.Flight.DepartureAirport.Name, departureAirport!));
                 break;
-            case "6":
+            case ManagerMenuConstants.FilterByDestinationAirport:
                 Console.Write("Enter the airport name: ");
                 var destinationAirport = Console.ReadLine();
-                if (string.IsNullOrEmpty(destinationAirport))
-                {
-                    Console.WriteLine("Invalid Input");
-                    return;
-                }
-                await FilterBooking(b => b.Flight.ArrivalAirport.Name == destinationAirport);
+                if (!ValidateRequiredString(destinationAirport, nameof(destinationAirport))) return;
+                await FilterBooking(b => CompareStringsWithoutCaseSensitive(b.Flight.ArrivalAirport.Name, destinationAirport!));
                 break;
-            case "7":
+            case ManagerMenuConstants.FilterByClass:
                 Console.Write("Enter the flight class name: ");
                 var flightClassNameInput = Console.ReadLine();
-                if (string.IsNullOrEmpty(flightClassNameInput))
-                {
-                    Console.WriteLine("Invalid Input");
-                    return;
-                }
-                await FilterBooking(b => b.FlightClass.ToString() == flightClassNameInput);
+                if (!ValidateRequiredString(flightClassNameInput, nameof(flightClassNameInput))) return;
+                await FilterBooking(b => CompareStringsWithoutCaseSensitive(b.FlightClass.ToString(), flightClassNameInput!));
                 break;
-            case "8":
+            case ManagerMenuConstants.FilterExit:
                 AppMenu.Exit();
                 break;
             default:
@@ -217,12 +157,8 @@ public class ManagerMenu
 
 
         var filePath = Console.ReadLine();
-        if (string.IsNullOrEmpty(filePath))
-        {
-            Console.WriteLine("Invalid input");
-            return;
-        }
-        var csvResult = await _importService.ImportFileAsync<Flight, FlightCsvDto>(filePath, FlightMapper.FromCsvDto,
+        if (!ValidateRequiredString(filePath, nameof(filePath))) return;
+        var csvResult = await _importService.ImportFileAsync<Flight, FlightCsvDto, Guid>(filePath!, FlightMapper.FromCsvDto,
             _flightService, FlightCsvValidator.Validate);
 
         if (csvResult.IsFailure)
@@ -254,5 +190,63 @@ public class ManagerMenu
         {
             Console.WriteLine(booking);
         }
+    }
+    
+    private static void ShowMenu()
+    {
+        Console.WriteLine("1. Import from CSV");
+        Console.WriteLine("2. View Validations Rules");
+        Console.WriteLine("3. Filter Bookings");
+        Console.WriteLine("4. Exit");
+    }
+
+    private static void ShowFilterBookingMenu()
+    {
+        Console.WriteLine("Filter Bookings");
+        Console.WriteLine("1. By Flight");
+        Console.WriteLine("2. By Passenger");
+        Console.WriteLine("3. By Departure Country");
+        Console.WriteLine("4. By Destination Country");
+        Console.WriteLine("5. By Departure Airport");
+        Console.WriteLine("6. By Destination Airport");
+        Console.WriteLine("7. By Flight Class Type");
+        Console.WriteLine("8. Exit");
+    }
+    
+    private static void ShowAvailableClassesMenu()
+    {
+        Console.WriteLine("Validation rules of available classes");
+        Console.WriteLine("1. User");
+        Console.WriteLine("2. Flight");
+        Console.WriteLine("3. Booking");
+    }
+
+    private static Guid GetGuid(string guid)
+    {
+        return Guid.TryParse(guid, out var userId) ? userId : Guid.Empty;
+    }
+
+    private static bool ValidateGuid(Guid id)
+    {
+        if (id != Guid.Empty)
+        {
+            return true;
+        }
+        Console.WriteLine("Invalid input");
+        return false;
+    }
+    
+    private static bool ValidateRequiredString(string? value, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            Console.WriteLine($"{fieldName} is invalid.");
+            return false;
+        }
+        return true;
+    }
+    private static bool CompareStringsWithoutCaseSensitive(string source, string to)
+    {
+        return String.Equals(source, to, StringComparison.OrdinalIgnoreCase);
     }
 }

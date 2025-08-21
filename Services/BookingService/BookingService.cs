@@ -1,65 +1,92 @@
 ﻿using FTSAirportTicketBookingSystem.Common;
 using FTSAirportTicketBookingSystem.Common.Errors;
-using FTSAirportTicketBookingSystem.Common.Services;
 using FTSAirportTicketBookingSystem.Models;
-using FTSAirportTicketBookingSystem.Repository;
+using FTSAirportTicketBookingSystem.Repositories;
 
 namespace FTSAirportTicketBookingSystem.Services.BookingService;
 
-public class BookingService : IBookingService
+public class BookingService : IBookingService<Guid>
 {
     private readonly IRepository _repository;
+    private readonly List<Booking> _bookings = [];
 
     public BookingService(IRepository repository)
     {
         _repository = repository;
     }
-    
-    public async Task<Result<Booking>> GetAsync(Func<Booking, bool> predicate)
+
+    public async Task<Result<ICollection<Booking>>> GetAllBookingsAsync()
     {
-        var bookings = await this._repository.ReadAsync<Booking>();
-        var bookingList = bookings.ToList();
-        var booking = bookingList.SingleOrDefault(predicate);
-        return booking == null ? BookingErrors.NotFound : booking;
+        return await GetBookings();
     }
 
-    public async Task<Result<ICollection<Booking>>> GetAllAsync()
+    public async Task<Result<Booking>> AddBookingAsync(Booking booking)
     {
-        var bookings = await this._repository.ReadAsync<Booking>();
-        return bookings.ToList();
+        var bookings = await GetBookings();
+        var isExist = bookings.Any(b => b.Passenger.Id == booking.Passenger.Id && b.Flight.Id == booking.Flight.Id);
+        if (isExist)
+        {
+            return BookingErrors.AlreadyExists;
+        }
+        bookings.Add(booking);
+        await this._repository.WriteAsync(bookings);
+        _bookings.Clear();
+        _bookings.AddRange(bookings);
+        return booking;
     }
 
-    public async Task<Result<Booking>> AddAsync(Booking booking)
+    public async Task<Result> CancelBookingAsync(Guid bookingId)
     {
-        var bookings = await this._repository.ReadAsync<Booking>();
-        var bookingList = bookings.ToList();
-        var isExist = bookingList.Any(b => b.Passenger.Id == booking.Passenger.Id && b.Flight.Id == booking.Flight.Id);
-        return isExist ? BookingErrors.AlreadyExists : await this._repository.WriteAsync(booking);
-    }
-
-    public async Task<Result> DeleteAsync(Guid bookingId)
-    {
-        var bookings = await this._repository.ReadAsync<Booking>();
-        var bookingList = bookings.ToList();
-        var canceledBooking = bookingList.SingleOrDefault(b => b.Id == bookingId);
+        var bookings = await GetBookings();
+        var canceledBooking = bookings.SingleOrDefault(b => b.Id == bookingId);
         if (canceledBooking == null)
         {
             return Result.Failure(BookingErrors.NotFound);
         }
-        await this._repository.DeleteAsync(canceledBooking);
+        bookings.Remove(canceledBooking);
+        await this._repository.WriteAsync(bookings);
+        _bookings.Clear();
+        _bookings.AddRange(bookings);
         return Result.Success();
     }
 
-    public async Task<Result<Booking>> UpdateAsync(Guid id, Booking booking)
+    public async Task<Result<Booking>> ModifyBookingAsync(Guid id, Booking booking)
     {
-        var bookings = await this._repository.ReadAsync<Booking>();
-        var bookingList = bookings.ToList();
-        var isExist = bookingList.Exists(b => b.Id == id);
-        return isExist ?  await this._repository.UpdateAsync(booking): BookingErrors.NotFound;
+        var bookings = await GetBookings();
+        var isExist = bookings.Exists(b => b.Id == id);
+        if (!isExist)
+        {
+            return BookingErrors.NotFound;
+        }
+        var index = bookings.FindIndex(item => item.Id.Equals(booking.Id));
+        bookings[index] = booking;
+        await this._repository.WriteAsync(bookings);
+        _bookings.Clear();
+        _bookings.AddRange(bookings);
+        return booking;
     }
 
     public async Task<Result<List<Booking>>> FilterAsync(params Func<Booking, bool>[] match)
     {
-        return await FilterHelper.FilterAsync(this, match);
+        return FilterHelper.FilterAsync(await GetBookings(), match);
+    }
+
+    private async Task<List<Booking>> GetBookings()
+    {
+        if (_bookings.Count > 0)
+        {
+            return _bookings;
+        }
+
+        var bookings = await _repository.ReadAsync<Booking>();
+        _bookings.Clear();
+        _bookings.AddRange(bookings);
+
+        return _bookings;
+    }
+
+    public async Task<Result<Booking>> AddAsync(Booking data)
+    {
+        return await AddBookingAsync(data);
     }
 }

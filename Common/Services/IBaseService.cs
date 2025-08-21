@@ -1,10 +1,9 @@
-﻿namespace FTSAirportTicketBookingSystem.Common.Services;
+﻿
+using FTSAirportTicketBookingSystem.Common.Models;
 
-public interface IBaseService<T>
+namespace FTSAirportTicketBookingSystem.Common.Services;
+
+public interface IBaseService<TEntity, TId>
 {
-    Task<Result<T>> GetAsync(Func<T, bool> predicate);
-    Task<Result<ICollection<T>>> GetAllAsync();
-    Task<Result<T>> AddAsync(T data);
-    Task<Result> DeleteAsync(Guid id);
-    Task<Result<T>> UpdateAsync(Guid id, T data);
+    Task<Result<TEntity>> AddAsync(TEntity data);
 }

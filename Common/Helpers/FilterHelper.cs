@@ -1,20 +1,19 @@
-﻿using FTSAirportTicketBookingSystem.Common.Services;
+﻿using FTSAirportTicketBookingSystem.Common.Models;
+using FTSAirportTicketBookingSystem.Common.Services;
 namespace FTSAirportTicketBookingSystem.Common;
 
 public static class FilterHelper
 {
-    public static async Task<Result<List<T>>> FilterAsync<T>(
-        IBaseService<T> baseService,
-        params Func<T, bool>[] predicates)
+    public static Result<List<T>> FilterAsync<T>(
+        List<T> items,
+        params Func<T, bool>?[] predicates)
     {
-        var result = await baseService.GetAllAsync();
-        if (result.IsFailure)
-            return result.Error;
+        ArgumentNullException.ThrowIfNull(predicates);
 
-        var resultList = result.Value;
-        Func<T, bool> combinedMatches = f => predicates.All(predicate => predicate(f));
-        return resultList.Where(combinedMatches).ToList();
+        if (predicates.Any(p => p is null))
+            throw new ArgumentException("Predicates array contains a null element.", nameof(predicates));
+        
+        Func<T, bool> combinedMatches = f => predicates.All(predicate => predicate!(f));
+        return items.Where(combinedMatches).ToList();
     }
-    
-    
 }

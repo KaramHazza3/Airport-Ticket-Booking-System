@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using CsvHelper;
 using FTSAirportTicketBookingSystem.Common;
+using FTSAirportTicketBookingSystem.Common.Models;
 using FTSAirportTicketBookingSystem.Common.Services;
 using FTSAirportTicketBookingSystem.Common.Validators.CsvValidators.Models;
 
@@ -9,17 +10,19 @@ namespace FTSAirportTicketBookingSystem.Services.ImportFileService;
 
 public class ImportCsvFileService : IFileImportService
 {
-    public async Task<Result<List<TEntity>>> ImportFileAsync<TEntity, TDto>(
+    public async Task<Result<List<TEntity>>> ImportFileAsync<TEntity, TDto, TId>(
         string filePath,
         Func<TDto, TEntity> mapper,
-        IBaseService<TEntity> baseService,
+        IBaseService<TEntity, TId> baseService,
         Func<TDto, int, List<CsvValidationError>> validator)
+        where TEntity : IEntity<TId>
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return Result<List<TEntity>>.Failure(new Error("Csv.FilePath", "File path cannot be empty."));
-        
+
         var entities = new List<TEntity>();
         var validationErrors = new List<CsvValidationError>();
+        var rowNumber = 2; 
 
         try
         {
@@ -28,13 +31,9 @@ public class ImportCsvFileService : IFileImportService
             {
                 MissingFieldFound = null
             });
-            var records = csv.GetRecords<TDto>().ToList();
 
-            for (int i = 0; i < records.Count; i++)
+            await foreach (var dto in csv.GetRecordsAsync<TDto>())
             {
-                var dto = records[i];
-                int rowNumber = i + 2;
-
                 var errors = validator(dto, rowNumber);
                 if (errors.Count == 0)
                 {
@@ -44,6 +43,7 @@ public class ImportCsvFileService : IFileImportService
                 {
                     validationErrors.AddRange(errors);
                 }
+                rowNumber++;
             }
 
             return await HandleAddition(baseService, validationErrors, entities);
@@ -55,7 +55,7 @@ public class ImportCsvFileService : IFileImportService
         }
     }
     
-    private static async Task<Result<List<TEntity>>> HandleAddition<TEntity>(IBaseService<TEntity> service, List<CsvValidationError> validationErrors, List<TEntity> entities)
+    private static async Task<Result<List<TEntity>>> HandleAddition<TEntity, TId>(IBaseService<TEntity, TId> service, List<CsvValidationError> validationErrors, List<TEntity> entities) where TEntity : IEntity<TId>
     {
         if (validationErrors.Any())
         {

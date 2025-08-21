@@ -1,4 +1,5 @@
-﻿using FTSAirportTicketBookingSystem.Models;
+﻿using FTSAirportTicketBookingSystem.Common.Helpers.Menus.Constants;
+using FTSAirportTicketBookingSystem.Models;
 using FTSAirportTicketBookingSystem.Models.Enums;
 using FTSAirportTicketBookingSystem.Services.BookingService;
 using FTSAirportTicketBookingSystem.Services.FlightService;
@@ -7,42 +8,13 @@ namespace FTSAirportTicketBookingSystem.Common.Helpers.Menus;
 
 public class PassengerMenu
 {
-    private readonly IBookingService _bookingService;
-    private readonly IFlightService _flightService;
+    private readonly IBookingService<Guid> _bookingService;
+    private readonly IFlightService<Guid> _flightService;
 
-    public PassengerMenu(IBookingService bookingService, IFlightService flightService)
+    public PassengerMenu(IBookingService<Guid> bookingService, IFlightService<Guid> flightService)
     {
-        this._bookingService = bookingService;
-        this._flightService = flightService;
-    }
-    
-    private static void Show()
-    {
-        Console.WriteLine("1. Search for available flights");
-        Console.WriteLine("2. Book a flight");
-        Console.WriteLine("3. Cancel a flight");
-        Console.WriteLine("4. View my bookings");
-        Console.WriteLine("5. Edit my booking");
-        Console.WriteLine("6. Exit");
-    }
-    
-    public static void ShowFlightClassesMenu()
-    {
-        Console.WriteLine("Select Class");
-        Console.WriteLine("1. Economy");
-        Console.WriteLine("2. Business");
-        Console.WriteLine("3. First Class");
-    }
-
-    public static void ShowSearchParameters()
-    {
-        Console.WriteLine("1. By Price");
-        Console.WriteLine("2. By Departure Country");
-        Console.WriteLine("3. By Destination Country");
-        Console.WriteLine("4. By Departure Airport");
-        Console.WriteLine("5. By Arrival Airport");
-        Console.WriteLine("6. By Class");
-        Console.WriteLine("7. Exit");
+        _bookingService = bookingService;
+        _flightService = flightService;
     }
     public async Task Handle(User user)
     {
@@ -53,22 +25,22 @@ public class PassengerMenu
 
             switch (passengerInput)
             {
-                case "1":
+                case PassengerMenuConstants.SearchForAvailableFlights:
                     await SearchForAvailableFlights();
                     break;
-                case "2":
+                case PassengerMenuConstants.BookFlight:
                     await BookFlight(user);
                     break;
-                case "3":
+                case PassengerMenuConstants.CancelBooking:
                     await CancelBooking(user);
                     break;
-                case "4":
+                case PassengerMenuConstants.ViewBookings:
                     await ViewBookings(user);
                     break;
-                case "5":
+                case PassengerMenuConstants.EditBooking:
                     await EditBooking(user);
                     break;
-                case "6":
+                case PassengerMenuConstants.Exit:
                     AppMenu.Exit();
                     break;
                 default:
@@ -86,66 +58,49 @@ public class PassengerMenu
             var passengerSearchInput = Console.ReadLine();
             switch (passengerSearchInput)
             {
-                case "1":
+                case PassengerMenuConstants.SearchByPrice:
                     Console.Write("Enter the price: ");
-                    if (!decimal.TryParse(Console.ReadLine(), out var price))
-                    {
-                        Console.WriteLine("Invalid input");
-                        return;
-                    }
-                    await SearchFlights(f => f.BasePrice == price);
+                    var price = GetPrice(Console.ReadLine()!);
+                    if (isNull(price)) return;
+                    await FilterFlights(f => f.BasePrice == price);
                     break;
-                case "2":
+                case PassengerMenuConstants.SearchByDepartureCountry:
                     Console.Write("Enter the country: ");
                     var departureCountryName = Console.ReadLine();
-                    if (string.IsNullOrEmpty(departureCountryName))
-                    {
-                        Console.WriteLine("Invalid input");
-                        return;
-                    }
-                    await SearchFlights(f => f.Departure.Name == departureCountryName);
+                    if (!ValidateRequiredString(departureCountryName, nameof(departureCountryName))) return;
+                    await FilterFlights(f => f.Departure.Name == departureCountryName);
                     break;
-                case "3":
+                case PassengerMenuConstants.SearchByDestinationCountry:
                     Console.Write("Enter the country: ");
                     var destinationCountryName = Console.ReadLine();
-                    if (string.IsNullOrEmpty(destinationCountryName))
-                    {
-                        Console.WriteLine("Invalid input");
-                        return;
-                    }
-                    await SearchFlights(f => f.Destination.Name == destinationCountryName);
+                    if (!ValidateRequiredString(destinationCountryName, nameof(destinationCountryName))) return;
+                    await FilterFlights(f => f.Destination.Name == destinationCountryName);
                     break;
-                case "4":
+                case PassengerMenuConstants.SearchByDepartureAirport:
                     Console.Write("Enter the airport: ");
                     var departureAirportName = Console.ReadLine();
-                    if (string.IsNullOrEmpty(departureAirportName))
-                    {
-                        Console.WriteLine("Invalid input");
-                        return;
-                    }
-                    await SearchFlights(f => f.DepartureAirport.Name == departureAirportName);
+                    if (!ValidateRequiredString(departureAirportName, nameof(departureAirportName))) return;
+                    await FilterFlights(f => f.DepartureAirport.Name == departureAirportName);
                     break;
-                case "5":
+                case PassengerMenuConstants.SearchByArrivalAirport:
                     Console.Write("Enter the airport: ");
                     var arrivalAirportName = Console.ReadLine();
-                    if (string.IsNullOrEmpty(arrivalAirportName))
-                    {
-                        Console.WriteLine("Invalid input");
-                        return;
-                    }
-                    await SearchFlights(f => f.ArrivalAirport.Name == arrivalAirportName);
+                    if (!ValidateRequiredString(arrivalAirportName, nameof(arrivalAirportName))) return;
+                    await FilterFlights(f => f.ArrivalAirport.Name == arrivalAirportName);
                     break;
-                case "6":
+                case PassengerMenuConstants.SearchByClass:
                     Console.Write("Enter the class: ");
                     var className = Console.ReadLine();
-                    if (string.IsNullOrEmpty(className))
+                    if (!ValidateRequiredString(className, nameof(className))) return;
+                    if (Enum.TryParse<FlightClass>(className, out var parsedClass))
                     {
-                        Console.WriteLine("Invalid input");
+                        await FilterFlights(f => f.AvailableClasses.Exists(ac => ac.ClassType == parsedClass));
                         return;
                     }
-                    await SearchFlights(f => f.AvailableClasses.Exists(ac => ac.ClassType.ToString() == className));
+
+                    Console.WriteLine("Invalid class type");
                     break;
-                case "7":
+                case PassengerMenuConstants.ExitSearch:
                     AppMenu.Exit();
                     break;
                 default:
@@ -155,9 +110,9 @@ public class PassengerMenu
 
         }
     }
-    private async Task SearchFlights(Func<Flight, bool> predicate)
+    private async Task FilterFlights(Func<Flight, bool> predicate)
     {
-        var result = await _flightService.FilterAsync(predicate);
+        var result = await _flightService.SearchFlight(predicate);
         if (result.IsFailure)
         {
             Console.WriteLine(result.Error.Description);
@@ -174,18 +129,12 @@ public class PassengerMenu
         DisplayFlights(flights);
     }
     
-    private void DisplayFlights(List<Flight> flights)
+    private static void DisplayFlights(List<Flight> flights)
     {
         foreach (var flight in flights)
         {
-            Console.WriteLine($"Flight Id: {flight.Id}");
-            Console.WriteLine($"From: {flight.Departure.Name}, Airport: {flight.DepartureAirport.Name}");
-            Console.WriteLine($"To: {flight.Destination.Name}, Airport: {flight.ArrivalAirport.Name}");
-            Console.WriteLine($"Base price: {flight.BasePrice}");
-            Console.WriteLine("Available Classes: " +
-                              string.Join(" | ", flight.AvailableClasses.Select(ac =>
-                                  $"{ac.ClassType} (Seats: {ac.AvailableSeats}, Price: {ac.Price:C})")));
-            Console.WriteLine(new string('-', 40));
+            Console.WriteLine(flight);
+            Console.WriteLine("**********************");
         }
     }
 
@@ -214,60 +163,20 @@ public class PassengerMenu
         var input = Console.ReadLine();
         switch (input)
         {
-            case "1":
-                ShowFlightClassesMenu();
-                var flightClassinput = Console.ReadLine();
-                switch (flightClassinput)
-                {
-                    case "1":
-                        bookingToUpdate!.FlightClass = FlightClass.Economy;
-                        break;
-                    case "2":
-                        bookingToUpdate!.FlightClass = FlightClass.Business;
-                        break;
-                    case "3":
-                        if (!bookingToUpdate!.Flight.AvailableClasses.Exists(ac =>
-                                ac.ClassType == FlightClass.FirstClass))
-                        {
-                            Console.WriteLine("The flight doesn't have first class");
-                            return;
-                        }
-                        bookingToUpdate!.FlightClass = FlightClass.FirstClass;
-                        break;
-                    default:
-                        Console.WriteLine("Invalid Input");
-                        return;
-                }
-
-                break;
-            case "2":
-                var flightsResult = await GetAllAvailableFlights();
-                if (flightsResult.IsFailure)
-                {
-                    Console.WriteLine("There is an issue while getting available flights");
-                    return;
-                }
-
-                var flights = flightsResult.Value;
-                DisplayFlights(flights);
-                Console.Write("Enter the flight id: ");
-                var flightIdInput = Console.ReadLine();
-                if (!Guid.TryParse(flightIdInput, out var flightId) &&
-                    !flights.Exists(f => f.Id == flightId))
-                {
-                    Console.WriteLine("Invalid input");
-                    return;
-                }
-
-                var flight = flights.SingleOrDefault(f => f.Id == flightId);
-                Console.Write("Choose the class: ");
-                bookingToUpdate!.Flight = flight!;
+            case PassengerMenuConstants.UpdateClass:
+                await UpdateFlightClass(bookingToUpdate!);
                 break;
             default:
                 Console.WriteLine("Invalid Input");
                 break;
         }
-        var updateResult = await _bookingService.UpdateAsync(bookingId, bookingToUpdate!);
+
+        await UpdateStorage(bookingId, bookingToUpdate);
+    }
+
+    private async Task UpdateStorage(Guid bookingId, Booking? bookingToUpdate)
+    {
+        var updateResult = await _bookingService.ModifyBookingAsync(bookingId, bookingToUpdate!);
 
         if (updateResult.IsFailure)
         {
@@ -277,29 +186,17 @@ public class PassengerMenu
 
         Console.WriteLine("Booking updated successfully");
     }
-    
-    public static void ShowUpdateBookingParameters()
+
+    private static void ShowUpdateBookingParameters()
     {
         Console.WriteLine("1. Flight Class");
-        Console.WriteLine("2. Flight");
     }
-
-    private async Task<Result<List<Flight>>> GetAllAvailableFlights()
-    {
-        var flightsResult = await this._flightService.GetAllAsync();
-        if (flightsResult.IsFailure)
-        {
-            Console.WriteLine(flightsResult.Error);
-            return new List<Flight>();
-        }
-
-        return flightsResult.Value.ToList();
-    }
+    
     private async Task BookFlight(User user)
     {
         Console.WriteLine("Book a flight");
 
-        var flightsResult = await this._flightService.GetAllAsync();
+        var flightsResult = await this._flightService.GetAllFlightsAsync();
         if (flightsResult.IsFailure)
         {
             Console.WriteLine(flightsResult.Error.Description);
@@ -332,13 +229,18 @@ public class PassengerMenu
             _ => FlightClass.Economy
         };
         var flight = flights.SingleOrDefault(f => f.Id == flightId);
-        if (!flight!.AvailableClasses.Exists(ac => ac.ClassType == FlightClass.FirstClass))
+        if (!flight!.AvailableClasses.Exists(ac => ac.ClassType == flightClass))
         {
             Console.WriteLine("The flight doesn't contain this class");
             return;
         }
+
+        if (flight.AvailableClasses.Find(ac => ac.ClassType == flightClass)!.AvailableSeats <= 0)
+        {
+            Console.WriteLine("There's no available seats for this class");
+        }
         var booking = new Booking(user, flight!, flightClass);
-        var bookingResult = await _bookingService.AddAsync(booking);
+        var bookingResult = await _bookingService.AddBookingAsync(booking);
 
         if (bookingResult.IsFailure)
         {
@@ -346,6 +248,7 @@ public class PassengerMenu
             return;
         }
 
+        await HandleSeatsAsync(flightClass, flightId, -1);
         Console.WriteLine("Booking successful");
     }
     
@@ -371,7 +274,7 @@ public class PassengerMenu
         }
 
         var bookingToDelete = myBookings.SingleOrDefault(b => b.Id == bookingId);
-        var deleteResult = await _bookingService.DeleteAsync(bookingToDelete!.Id);
+        var deleteResult = await _bookingService.CancelBookingAsync(bookingToDelete!.Id);
 
         if (deleteResult.IsFailure)
         {
@@ -379,9 +282,61 @@ public class PassengerMenu
             return;
         }
 
+        await HandleSeatsAsync(bookingToDelete.FlightClass, bookingToDelete.Flight.Id, 1);
         Console.WriteLine("Booking cancelled");
     }
     
+     private async Task UpdateFlightClass(Booking bookingToUpdate)
+    {
+        ShowFlightClassesMenu();
+        var flightClassinput = Console.ReadLine();
+        switch (flightClassinput)
+        {
+            case PassengerMenuConstants.UpdateToEconomy:
+                await HandleSeatsAsync(bookingToUpdate.FlightClass, bookingToUpdate.Flight.Id, 1);
+                bookingToUpdate!.FlightClass = FlightClass.Economy;
+                await HandleSeatsAsync(bookingToUpdate.FlightClass, bookingToUpdate.Flight.Id, -1);
+                break;
+            case PassengerMenuConstants.UpdateToBusiness:
+                await HandleSeatsAsync(bookingToUpdate.FlightClass, bookingToUpdate.Flight.Id, 1);
+                bookingToUpdate!.FlightClass = FlightClass.Business;
+                await HandleSeatsAsync(bookingToUpdate.FlightClass, bookingToUpdate.Flight.Id, -1);
+                break;
+            case PassengerMenuConstants.UpdateToFirstClass:
+                if (!bookingToUpdate!.Flight.AvailableClasses.Exists(ac =>
+                        ac.ClassType == FlightClass.FirstClass))
+                {
+                    Console.WriteLine("The flight doesn't have first class");
+                    return;
+                }
+                await HandleSeatsAsync(bookingToUpdate.FlightClass, bookingToUpdate.Flight.Id, 1);
+                bookingToUpdate!.FlightClass = FlightClass.FirstClass;
+                await HandleSeatsAsync(bookingToUpdate.FlightClass, bookingToUpdate.Flight.Id, -1);
+                break;
+            default:
+                Console.WriteLine("Invalid Input");
+                return;
+        }
+    }
+    
+    private async Task HandleSeatsAsync(FlightClass flightClass, Guid flightId, int seatChange)
+    {
+        var flightResult = await _flightService.GetFlightById(flightId);
+        if (flightResult.IsFailure)
+        {
+            Console.WriteLine("The flight not found");   
+        }
+
+        var flight = flightResult.Value;
+        var targetFlightClass = flight.AvailableClasses
+            .Find(ac => ac.ClassType == flightClass);
+
+        if (targetFlightClass is null)
+            throw new InvalidOperationException($"Flight class {flightClass} not found.");
+        targetFlightClass.AvailableSeats += seatChange;
+
+        await _flightService.ModifyFlightAsync(flight.Id, flight);
+    }
     private async Task ViewBookings(User user)
     {
         Console.WriteLine("View my bookings");
@@ -393,13 +348,69 @@ public class PassengerMenu
         }
 
         var myBookings = myBookingsResult.Value;
-        foreach (var b in myBookings)
+        foreach (var booking in myBookings)
         {
-            Console.WriteLine($"Booking Id: {b.Id}");
-            Console.WriteLine($"Flight Id: {b.Flight.Id}");
-            Console.WriteLine($"Class: {b.FlightClass}");
-            Console.WriteLine($"Passenger Id: {b.Passenger.Id}");
-            Console.WriteLine("====================================");
+            Console.WriteLine(booking);
         }
+    }
+    
+    private static void Show()
+    {
+        Console.WriteLine("1. Search for available flights");
+        Console.WriteLine("2. Book a flight");
+        Console.WriteLine("3. Cancel a booking");
+        Console.WriteLine("4. View my bookings");
+        Console.WriteLine("5. Edit my booking");
+        Console.WriteLine("6. Exit");
+    }
+    
+    private static void ShowFlightClassesMenu()
+    {
+        Console.WriteLine("Select Class");
+        Console.WriteLine("1. Economy");
+        Console.WriteLine("2. Business");
+        Console.WriteLine("3. First Class");
+    }
+
+    private static void ShowSearchParameters()
+    {
+        Console.WriteLine("1. By Price");
+        Console.WriteLine("2. By Departure Country");
+        Console.WriteLine("3. By Destination Country");
+        Console.WriteLine("4. By Departure Airport");
+        Console.WriteLine("5. By Arrival Airport");
+        Console.WriteLine("6. By Class");
+        Console.WriteLine("7. Exit");
+    }
+
+    private static decimal? GetPrice(string price)
+    {
+        if (!decimal.TryParse(Console.ReadLine(), out var validatedPrice))
+        {
+            Console.WriteLine("Invalid input");
+            return null;
+        }
+
+        return validatedPrice;
+    }
+
+    private static bool isNull(object? input)
+    {
+        if (input == null)
+        {
+            Console.WriteLine("Invalid input");
+            return true;
+        }
+
+        return false;
+    }
+    private static bool ValidateRequiredString(string? value, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            Console.WriteLine($"{fieldName} is invalid.");
+            return false;
+        }
+        return true;
     }
 }

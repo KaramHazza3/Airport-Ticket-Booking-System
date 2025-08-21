@@ -5,7 +5,7 @@ namespace FTSAirportTicketBookingSystem.Common;
 public static class AttributeConstraintsGenerator
 {
 
-    public static List<AttributeConstraint> GetAttributesConstraints<T>()
+    public static IReadOnlyList<AttributeConstraint> GetValidationConstraints<T>()
     {
         var properties = typeof(T).GetProperties();
         var constraints = new List<AttributeConstraint>();
@@ -27,7 +27,7 @@ public static class AttributeConstraintsGenerator
                 switch (attribute)
                 {
                     case RequiredAttribute:
-                        propertyConstraint.Constraints.Add("Required");
+                        propertyConstraint.Constraints.Add(ValidationConstants.Required);
                         break;
                 }
                 
@@ -40,6 +40,6 @@ public static class AttributeConstraintsGenerator
             constraints.Add(propertyConstraint);
         }
         
-        return constraints;
+        return constraints.AsReadOnly();
     }
 }

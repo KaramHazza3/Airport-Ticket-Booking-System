@@ -1,5 +1,5 @@
 ﻿using FTSAirportTicketBookingSystem.Common.Helpers.Menus;
-using FTSAirportTicketBookingSystem.Repository;
+using FTSAirportTicketBookingSystem.Repositories;
 using FTSAirportTicketBookingSystem.Services.AuthService;
 using FTSAirportTicketBookingSystem.Services.BookingService;
 using FTSAirportTicketBookingSystem.Services.FlightService;

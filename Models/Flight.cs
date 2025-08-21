@@ -1,13 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FTSAirportTicketBookingSystem.Common.CustomAttributes;
+using FTSAirportTicketBookingSystem.Common.Models;
 using FTSAirportTicketBookingSystem.Models.Enums;
 
 namespace FTSAirportTicketBookingSystem.Models;
 
-public class Flight
+public class Flight : IEntity<Guid>
 {
     [Required]
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
     public decimal BasePrice { get; set; }
     [Required]
     public Country Departure { get; set; }
@@ -22,7 +23,7 @@ public class Flight
     public DateTime DepartureDate { get; set; }
     [Required]
     public List<FlightClassInfo> AvailableClasses { get; init; }
-    public int TotalAvailableSeats => AvailableClasses.Sum(c => c.AvailableSeats);
+    private int TotalAvailableSeats => AvailableClasses.Sum(c => c.AvailableSeats);
 
     public Flight()
     {
@@ -40,7 +41,7 @@ public class Flight
         this.ArrivalAirport = arrivalAirport;
         this.DepartureDate = departureDate;
         this.AvailableClasses = availableClasses;
-        this.BasePrice = AvailableClasses!.Where(ac => ac.ClassType == FlightClass.Economy).Sum(x => x.Price);
+        this.BasePrice = AvailableClasses!.FirstOrDefault(ac => ac.ClassType == FlightClass.Economy)?.Price ?? 0;
     }
     
     public override string ToString()
@@ -51,11 +52,26 @@ public class Flight
 
         return $"Flight ID: {Id}\n" +
                $"Base Price: {BasePrice:C}\n" +
-               $"From: {Departure} - {DepartureAirport}\n" +
-               $"To: {Destination} - {ArrivalAirport}\n" +
+               $"From: {Departure} - Airport: {DepartureAirport}\n" +
+               $"To: {Destination} - Airport: {ArrivalAirport}\n" +
                $"Departure Date: {DepartureDate:yyyy-MM-dd HH:mm}\n" +
                $"Total Available Seats: {TotalAvailableSeats}\n" +
                $"Available Classes: {classInfo}";
+    }
+    
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Flight other)
+        {
+            return false;
+        }
+
+        return this.Id.Equals(other.Id);
+    }
+
+    public override int GetHashCode()
+    {
+        return this.Id.GetHashCode();
     }
 
 }

@@ -1,62 +1,84 @@
 ﻿using FTSAirportTicketBookingSystem.Common;
 using FTSAirportTicketBookingSystem.Common.Errors;
 using FTSAirportTicketBookingSystem.Models;
-using FTSAirportTicketBookingSystem.Repository;
+using FTSAirportTicketBookingSystem.Repositories;
 
 namespace FTSAirportTicketBookingSystem.Services.UserService;
 
-public class UserService : IUserService
+public class UserService : IUserService<Guid>
 {
     private readonly IRepository _repository;
+    private readonly List<User> _users = [];
     public UserService(IRepository repository)
     {
         this._repository = repository;
     }
-    
-    public async Task<Result<User>> GetAsync(Func<User, bool> predicate)
+
+    public async Task<Result<ICollection<User>>> GetAllUsersAsync()
     {
-        var users = await this._repository.ReadAsync<User>();
-        var usersList = users.ToList();
-        var user = usersList.SingleOrDefault(predicate);
-        return user == null ? UserErrors.NotFound : user;
+        return await GetUsers();
     }
 
-    public async Task<Result<ICollection<User>>> GetAllAsync()
+    public async Task<Result<User>> AddUserAsync(User user)
     {
-        var users = await this._repository.ReadAsync<User>();
-        return users.ToList();
-    }
-
-    public async Task<Result<User>> AddAsync(User user)
-    {
-        var users = await this._repository.ReadAsync<User>();
-        var usersList = users.ToList();
-        var isExist = usersList.Any(u => u.Email.Equals(user.Email));
+        var users = await GetUsers();
+        var isExist = users.Any(u => u.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase));
         if (isExist)
         {
             return UserErrors.AlreadyExists;
         }
-        return await this._repository.WriteAsync(user);
+        users.Add(user);
+        await this._repository.WriteAsync(users);
+        _users.Clear();
+        _users.AddRange(users);
+        return user;
     }
 
-    public async Task<Result> DeleteAsync(Guid userId)
+    public async Task<Result> DeleteUserAsync(Guid userId)
     {
-        var users = await this._repository.ReadAsync<User>();
-        var usersList = users.ToList();
-        var user = usersList.SingleOrDefault(b => b.Id == userId);
+        var users = await GetUsers();
+        var user = users.SingleOrDefault(b => b.Id == userId);
         if (user == null)
         {
             return Result.Failure(UserErrors.NotFound);
         }
-        await this._repository.DeleteAsync(user);
+        users.Remove(user);
+        await this._repository.WriteAsync(users);
+        _users.Clear();
+        _users.AddRange(users);
         return Result.Success();
     }
 
-    public async Task<Result<User>> UpdateAsync(Guid id, User user)
+    public async Task<Result<User>> ModifyUserAsync(Guid id, User user)
     {
+        var users = await GetUsers();
+        var isExist = users.Exists(b => b.Id == id);
+        if (!isExist)
+        {
+            return UserErrors.NotFound;
+        }
+        var index = users.FindIndex(item => item.Id.Equals(user.Id));
+        users[index] = user;
+        await this._repository.WriteAsync(users);
+        _users.Clear();
+        _users.AddRange(users);
+        return user;
+    }
+    
+    private async Task<List<User>> GetUsers()
+    {
+        if (_users.Count > 0)
+        {
+            return _users;
+        }
         var users = await this._repository.ReadAsync<User>();
-        var usersList = users.ToList();
-        var isExist = usersList.Exists(b => b.Id == id);
-        return isExist ?  await this._repository.UpdateAsync(user): UserErrors.NotFound;
+        _users.Clear();
+        _users.AddRange(users);
+        return users.ToList();
+    }
+
+    public async Task<Result<User>> AddAsync(User data)
+    {
+        return await AddUserAsync(data);
     }
 }

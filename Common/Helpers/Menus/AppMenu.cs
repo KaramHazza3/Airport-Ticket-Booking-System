@@ -1,5 +1,5 @@
-﻿using FTSAirportTicketBookingSystem.Models;
-using FTSAirportTicketBookingSystem.Repository;
+﻿using FTSAirportTicketBookingSystem.Common.Helpers.Menus.Constants;
+using FTSAirportTicketBookingSystem.Models;
 using FTSAirportTicketBookingSystem.Services.AuthService;
 using FTSAirportTicketBookingSystem.Services.BookingService;
 using FTSAirportTicketBookingSystem.Services.FlightService;
@@ -15,19 +15,12 @@ public class AppMenu
     private readonly ManagerMenu _managerMenu;
 
 
-    public AppMenu(IAuthService authService, IBookingService bookingService , IFlightService flightService, IFileImportService importService)
+    public AppMenu(IAuthService authService, IBookingService<Guid> bookingService , IFlightService<Guid> flightService, IFileImportService importService)
     {
-        this._authService = authService;
-        this._importService = importService;
+        _authService = authService;
+        _importService = importService;
         _passengerMenu = new PassengerMenu(bookingService, flightService);
         _managerMenu = new ManagerMenu(bookingService, importService, flightService);
-    }
-    
-    private static void Show()
-    {
-        Console.WriteLine("1. Login");
-        Console.WriteLine("2. Register");
-        Console.WriteLine("3. Exit");
     }
     
     public async Task Handle()
@@ -39,13 +32,13 @@ public class AppMenu
 
             switch (input)
             {
-                case "1":
+                case AppMenuConstants.Login:
                     await HandleLogin();
                     break;
-                case "2":
+                case AppMenuConstants.Register:
                     await HandleRegistration();
                     break;
-                case "3":
+                case AppMenuConstants.Exit:
                     Exit();
                     break;
                 default:
@@ -127,5 +120,12 @@ public class AppMenu
         }
 
         Console.WriteLine("Registration successful");
+    }
+    
+    private static void Show()
+    {
+        Console.WriteLine("1. Login");
+        Console.WriteLine("2. Register");
+        Console.WriteLine("3. Exit");
     }
 }

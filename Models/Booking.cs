@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FTSAirportTicketBookingSystem.Common.CustomAttributes;
+using FTSAirportTicketBookingSystem.Common.Models;
 using FTSAirportTicketBookingSystem.Models.Enums;
 namespace FTSAirportTicketBookingSystem.Models;
 
-public class Booking : IEquatable<Booking>
+public class Booking : IEquatable<Booking>, IEntity<Guid>
 {
     [Required]
     public Guid Id { get; init; }
@@ -13,9 +14,10 @@ public class Booking : IEquatable<Booking>
     public Flight Flight { get; set; }
     [Required]
     public FlightClass FlightClass { get; set; }
+
     [Required]
-    [Future]
-    public DateTime BookingDate { get; }
+    [Future] 
+    public DateTime BookingDate { get; } = DateTime.UtcNow;
    
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Must be greater than 0")]
@@ -31,7 +33,6 @@ public class Booking : IEquatable<Booking>
         this.Passenger = passenger;
         this.Flight = flight;
         this.FlightClass = flightClass;
-        this.BookingDate = DateTime.UtcNow;
         this.Price = this.Flight.AvailableClasses
             .Where(x => x.ClassType == flightClass)
             .Sum(x => x.Price);
@@ -57,4 +58,5 @@ public class Booking : IEquatable<Booking>
     BookingDate  : {BookingDate:yyyy-MM-dd HH:mm:ss} (UTC)
 }}";
     }
+    
 }

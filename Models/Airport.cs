@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using FTSAirportTicketBookingSystem.Common.Models;
 
 namespace FTSAirportTicketBookingSystem.Models;
 
-public class Airport
+public class Airport : IEntity<Guid>
 {
     [Required]
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
     [Required]
     public string Name { get; set; }
     [Required]
@@ -26,5 +27,20 @@ public class Airport
     public override string ToString()
     {
         return $"Airport: {Name} - Id: {Id}";
+    }
+    
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Airport other)
+        {
+            return false;
+        }
+
+        return this.Id.Equals(other.Id);
+    }
+
+    public override int GetHashCode()
+    {
+        return this.Id.GetHashCode();
     }
 }
