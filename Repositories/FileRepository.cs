@@ -34,27 +34,6 @@ public class FileRepository : IRepository
         await WriteCollectionToFileAsync(data, filePath);
     }
 
-    // public async Task DeleteAsync<T>(T[] data) where T : class
-    // {
-    //     var collectionName = typeof(T).Name;
-    //     var filePath = GetFilePath(collectionName);
-    //     var items = await GetFileContentAsList<T>(filePath);
-    //     var index = items.FindIndex(item => item.Equals(data));
-    //     items.RemoveAt(index);
-    //     await WriteCollectionToFileAsync(items, filePath);
-    // }
-    //
-    // public async Task<T> UpdateAsync<T>(T[] data) where T : class
-    // {
-    //     var collectionName = typeof(T).Name;
-    //     var filePath = GetFilePath(collectionName);
-    //     var items = await GetFileContentAsList<T>(filePath);
-    //     var index = items.FindIndex(item => item.Equals(data));
-    //     items[index] = data;
-    //     await WriteCollectionToFileAsync(items, filePath);
-    //     return data;
-    // }
-
     private static async Task<List<T>> GetFileContentAsList<T>(string filePath)
     {
         var fileContent = await File.ReadAllTextAsync(filePath);
